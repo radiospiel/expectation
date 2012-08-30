@@ -4,5 +4,5 @@
 # License::   Distributes under the terms of the Modified BSD License, see LICENSE.BSD for details.
 module Expectation
   # The expectation gem's version.
-  VERSION="0.1"
+  VERSION="0.1.1"
 end

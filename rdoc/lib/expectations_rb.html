@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+
+	<title>File: expectations.rb [expectations 0.1]</title>
+
+	<link type="text/css" media="screen" href="../rdoc.css" rel="stylesheet" />
+
+	<script src="../js/jquery.js" type="text/javascript"
+		charset="utf-8"></script>
+	<script src="../js/thickbox-compressed.js" type="text/javascript"
+		charset="utf-8"></script>
+	<script src="../js/quicksearch.js" type="text/javascript"
+		charset="utf-8"></script>
+	<script src="../js/darkfish.js" type="text/javascript"
+		charset="utf-8"></script>
+</head>
+
+<body class="file file-popup">
+	<div id="metadata">
+		<dl>
+			<dt class="modified-date">Last Modified</dt>
+			<dd class="modified-date">2012-08-30 13:03:24 +0200</dd>
+
+			
+			<dt class="requires">Requires</dt>
+			<dd class="requires">
+				<ul>
+				
+				</ul>
+			</dd>
+			
+
+			
+		</dl>
+	</div>
+
+	<div id="documentation">
+		
+		<div class="description">
+			<h2>Description</h2>
+			<p>
+The <a href="../Expectations.html">Expectations</a> module implements
+methods to verify one or more values against  set of expectations. This is
+a subset of design-by-contract programming (see <a
+href="http://en.wikipedia.org/wiki/Design_by_contract">en.wikipedia.org/wiki/Design_by_contract</a>)
+features, and should speed you up during development phases.
+</p>
+<h2>Example</h2>
+<p>
+This function expects a String argument starting with
+<tt>&quot;http:&quot;</tt>,  an Integer or Float argument, and a Hash with
+a String entry at key  <tt>:foo</tt>, and either an Array or <tt>nil</tt>
+at key <tt>:bar</tt>.
+</p>
+<pre>
+  def function(a, b, options = {})
+    expect! a =&gt; /^http:/, 
+            b =&gt; [Integer, Float], 
+            options =&gt; {
+              :foo =&gt; String,
+              :bar =&gt; [ Array, nil ]
+            }
+  end</pre>
+
+		</div>
+		
+	</div>
+</body>
+</html>
+

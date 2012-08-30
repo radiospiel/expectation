@@ -1,13 +1,13 @@
 $:.unshift File.expand_path("../lib", __FILE__)
-require "expectations/version"
+require "expectation/version"
 
 Gem::Specification.new do |gem|
-  gem.name     = "expectations"
-  gem.version  = Expectations::VERSION
+  gem.name     = "expectation"
+  gem.version  = Expectation::VERSION
 
   gem.author   = "radiospiel"
   gem.email    = "eno@radiospiel.org"
-  gem.homepage = "http://github.com/radiospiel/expectations"
+  gem.homepage = "http://github.com/radiospiel/expectation"
   gem.summary  = "Defensive programming with expectations"
 
   gem.description = gem.summary

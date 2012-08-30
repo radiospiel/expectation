@@ -3,11 +3,11 @@ $:.unshift File.expand_path("../lib", __FILE__)
 require 'rdoc/task'
 
 RDoc::Task.new do |rdoc|
-  require "expectations/version"
-  version = Expectations::VERSION
+  require "expectation/version"
+  version = Expectation::VERSION
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "expectations #{version}"
+  rdoc.title = "expectation #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end

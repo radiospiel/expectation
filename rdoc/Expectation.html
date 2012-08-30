@@ -5,7 +5,7 @@
 <head>
 	<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 
-	<title>Module: Expectations</title>
+	<title>Module: Expectation</title>
 
 	<link rel="stylesheet" href="./rdoc.css" type="text/css" media="screen" />
 
@@ -38,11 +38,11 @@
 				<div class="section-body">
 					<ul>
 					
-						<li><a href="./lib/expectations/version_rb.html?TB_iframe=true&amp;height=550&amp;width=785"
-							class="thickbox" title="lib/expectations/version.rb">lib/expectations/version.rb</a></li>
+						<li><a href="./lib/expectation/version_rb.html?TB_iframe=true&amp;height=550&amp;width=785"
+							class="thickbox" title="lib/expectation/version.rb">lib/expectation/version.rb</a></li>
 					
-						<li><a href="./lib/expectations_rb.html?TB_iframe=true&amp;height=550&amp;width=785"
-							class="thickbox" title="lib/expectations.rb">lib/expectations.rb</a></li>
+						<li><a href="./lib/expectation_rb.html?TB_iframe=true&amp;height=550&amp;width=785"
+							class="thickbox" title="lib/expectation.rb">lib/expectation.rb</a></li>
 					
 					</ul>
 				</div>
@@ -102,7 +102,7 @@
 
 				<ul class="link-list">
 				
-					<li><a href="./Expectations.html">Expectations</a></li>
+					<li><a href="./Expectation.html">Expectation</a></li>
 				
 				</ul>
 				<div id="no-class-search-results" style="display: none;">No matching classes.</div>
@@ -113,13 +113,13 @@
 	</div>
 
 	<div id="documentation">
-		<h1 class="module">Expectations</h1>
+		<h1 class="module">Expectation</h1>
 
 		<div id="description">
 			<p>
-The <a href="Expectations.html">Expectations</a> module implements methods
-to verify one or more values against  set of expectations. This is a subset
-of design-by-contract programming (see <a
+The <a href="Expectation.html">Expectation</a> module implements methods to
+verify one or more values against  set of expectations. This is a subset of
+design-by-contract programming (see <a
 href="http://en.wikipedia.org/wiki/Design_by_contract">en.wikipedia.org/wiki/Design_by_contract</a>)
 features, and should speed you up during development phases.
 </p>
@@ -151,7 +151,7 @@ at key <tt>:bar</tt>.
 				<dt><a name="VERSION">VERSION</a></dt>
 				
 				<dd class="description"><p>
-The expectations gem&#8217;s version.
+The expectation gem&#8217;s version.
 </p></dd>
 				
 			
@@ -183,7 +183,7 @@ The expectations gem&#8217;s version.
 					
 					<p>
 Disable the <a
-href="Expectations.html#method-i-expect">Expectations#expect</a> method.
+href="Expectation.html#method-i-expect">Expectation#expect</a> method.
 </p>
 					
 
@@ -191,7 +191,7 @@ href="Expectations.html#method-i-expect">Expectations#expect</a> method.
 					<div class="method-source-code"
 						id="disable-source">
 <pre>
-     <span class="ruby-comment cmt"># File lib/expectations.rb, line 114</span>
+     <span class="ruby-comment cmt"># File lib/expectation.rb, line 114</span>
 114:   <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">disable</span>
 115:     <span class="ruby-identifier">alias_method</span> <span class="ruby-value">:expect</span>, <span class="ruby-value">:expect_dummy!</span>
 116:   <span class="ruby-keyword kw">end</span></pre>
@@ -220,7 +220,7 @@ href="Expectations.html#method-i-expect">Expectations#expect</a> method.
 					
 					<p>
 Enable the <a
-href="Expectations.html#method-i-expect">Expectations#expect</a> method.
+href="Expectation.html#method-i-expect">Expectation#expect</a> method.
 </p>
 					
 
@@ -228,7 +228,7 @@ href="Expectations.html#method-i-expect">Expectations#expect</a> method.
 					<div class="method-source-code"
 						id="enable-source">
 <pre>
-     <span class="ruby-comment cmt"># File lib/expectations.rb, line 109</span>
+     <span class="ruby-comment cmt"># File lib/expectation.rb, line 109</span>
 109:   <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">enable</span>
 110:     <span class="ruby-identifier">alias_method</span> <span class="ruby-value">:expect</span>, <span class="ruby-value">:expect!</span>
 111:   <span class="ruby-keyword kw">end</span></pre>
@@ -265,7 +265,7 @@ exception if the expectation is not met.
 					<div class="method-source-code"
 						id="verify--source">
 <pre>
-     <span class="ruby-comment cmt"># File lib/expectations.rb, line 77</span>
+     <span class="ruby-comment cmt"># File lib/expectation.rb, line 77</span>
  77:   <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">verify!</span>(<span class="ruby-identifier">value</span>, <span class="ruby-identifier">expectation</span>)
  78:     <span class="ruby-identifier">failed_value</span>, <span class="ruby-identifier">failed_expectation</span>, <span class="ruby-identifier">message</span> = <span class="ruby-identifier">value</span>, <span class="ruby-identifier">expectation</span>, <span class="ruby-keyword kw">nil</span>
  79:     
@@ -330,8 +330,8 @@ Verifies a number of expectations. If one or more expectations are  not met
 it raises an ArgumentError.
 </p>
 <p>
-This method can be enabled or disabled at runtime using 
-Expectations.enable and Expectations.disable.  
+This method can be enabled or disabled at runtime using  Expectation.enable
+and Expectation.disable.  
 </p>
 					
 
@@ -339,7 +339,7 @@ Expectations.enable and Expectations.disable.
 					<div class="method-source-code"
 						id="expect-source">
 <pre>
-    <span class="ruby-comment cmt"># File lib/expectations.rb, line 54</span>
+    <span class="ruby-comment cmt"># File lib/expectation.rb, line 54</span>
 54:   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">expect</span>(*<span class="ruby-identifier">expectations</span>, &amp;<span class="ruby-identifier">block</span>)
 55:     <span class="ruby-identifier">expect!</span>(*<span class="ruby-identifier">expectations</span>, &amp;<span class="ruby-identifier">block</span>)
 56:   <span class="ruby-keyword kw">end</span></pre>
@@ -372,8 +372,8 @@ expectations are not met.
 </p>
 <p>
 In contrast to <a
-href="Expectations.html#method-i-expect">Expectations#expect</a> this
-method can not be disabled at runtime.
+href="Expectation.html#method-i-expect">Expectation#expect</a> this method
+can not be disabled at runtime.
 </p>
 					
 
@@ -381,20 +381,20 @@ method can not be disabled at runtime.
 					<div class="method-source-code"
 						id="expect--source">
 <pre>
-    <span class="ruby-comment cmt"># File lib/expectations.rb, line 32</span>
+    <span class="ruby-comment cmt"># File lib/expectation.rb, line 32</span>
 32:   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">expect!</span>(*<span class="ruby-identifier">expectations</span>, &amp;<span class="ruby-identifier">block</span>)
 33:     <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">block_given?</span>
-34:       <span class="ruby-constant">Expectations</span>.<span class="ruby-identifier">verify!</span> <span class="ruby-keyword kw">true</span>, <span class="ruby-identifier">block</span>
+34:       <span class="ruby-constant">Expectation</span>.<span class="ruby-identifier">verify!</span> <span class="ruby-keyword kw">true</span>, <span class="ruby-identifier">block</span>
 35:     <span class="ruby-keyword kw">end</span>
 36:     
 37:     <span class="ruby-identifier">expectations</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">expectation</span><span class="ruby-operator">|</span>
 38:       <span class="ruby-keyword kw">case</span> <span class="ruby-identifier">expectation</span>
 39:       <span class="ruby-keyword kw">when</span> <span class="ruby-constant">Hash</span>
 40:         <span class="ruby-identifier">expectation</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">value</span>, <span class="ruby-identifier">e</span><span class="ruby-operator">|</span>
-41:           <span class="ruby-constant">Expectations</span>.<span class="ruby-identifier">verify!</span> <span class="ruby-identifier">value</span>, <span class="ruby-identifier">e</span>
+41:           <span class="ruby-constant">Expectation</span>.<span class="ruby-identifier">verify!</span> <span class="ruby-identifier">value</span>, <span class="ruby-identifier">e</span>
 42:         <span class="ruby-keyword kw">end</span>
 43:       <span class="ruby-keyword kw">else</span>
-44:         <span class="ruby-constant">Expectations</span>.<span class="ruby-identifier">verify!</span> <span class="ruby-identifier">expectation</span>, <span class="ruby-value">:truish</span>
+44:         <span class="ruby-constant">Expectation</span>.<span class="ruby-identifier">verify!</span> <span class="ruby-identifier">expectation</span>, <span class="ruby-value">:truish</span>
 45:       <span class="ruby-keyword kw">end</span>
 46:     <span class="ruby-keyword kw">end</span>
 47:   <span class="ruby-keyword kw">end</span></pre>

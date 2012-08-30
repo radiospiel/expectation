@@ -15,4 +15,4 @@ SimpleCov.start do
   add_filter "test/*.rb"
 end
 
-require "expectations"
+require "expectation"

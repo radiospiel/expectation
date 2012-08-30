@@ -3,7 +3,7 @@
 # License::   Distributes under the terms  of the Modified BSD License, see LICENSE.BSD for details.
 require_relative 'test_helper'
 
-class ExpectationsTest < Test::Unit::TestCase
+class ExpectationTest < Test::Unit::TestCase
   def assert_expectation!(*expectation, &block)
     assert_nothing_raised do
       expect! *expectation, &block
@@ -108,11 +108,11 @@ class ExpectationsTest < Test::Unit::TestCase
     assert_failed_expectation! "foo" => "bar"
     assert_failed_expectation "foo" => "bar"
 
-    Expectations.disable
+    Expectation.disable
     assert_failed_expectation! "foo" => "bar"
     assert_expectation "foo" => "bar"
 
-    Expectations.enable
+    Expectation.enable
     assert_failed_expectation! "foo" => "bar"
     assert_failed_expectation "foo" => "bar"
   end

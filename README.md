@@ -4,6 +4,14 @@
 
     gem install expectations
 
+## Presentation
+
+A short presentation is hosted at [Github](http://radiospiel.github.com/expectation).
+
+## Documentation
+
+Documentation is available at [rubydoc.info](http://rubydoc.info/gems/expectation).
+
 ## Getting started
 
 This function expects a String argument starting with "http:", an Integer or Float argument, and a Hash

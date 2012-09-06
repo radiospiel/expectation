@@ -58,6 +58,13 @@
 			<div class="slides">
 
 <section data-markdown>
+<h1>&nbsp;</h1>
+#   What to expect…
+
+[@radiospiel](https://twitter.com/radiospiel)
+</section>
+
+<section data-markdown>
 ##   What to expect…
 <p>
   <img src="assets/smiling-at-camera-cat-expectation-vs-reality.jpg"></p>
@@ -74,9 +81,9 @@
 </section>
 <!-- Next slide ----------- -->
 <section data-markdown>
-## Example: Eiffel
+### Example: Eiffel
 
-"OO language and software contstruction environment, from 1986."
+"OO language and software construction environment, from 1986."
 
 <pre><code>decrement is
     -- Decrease counter by one.
@@ -91,7 +98,7 @@
 </section>
 <!-- Next slide ----------- -->
 <section data-markdown>
-## Example: Eiffel (2)
+### Example: Eiffel (2)
 
 <pre><code>decrement is
     -- Decrease counter by one.   # inline documentation
@@ -106,7 +113,7 @@
 </section>
 <!-- Next slide ----------- -->
 <section data-markdown>
-## Example: C
+### Example: C
 
 <pre><code class="c">void process_short_string(const char* string) {
   assert(strlen(string) == 12);
@@ -225,8 +232,9 @@ expect! {
 
 <!-- Next slide ----------- -->
 
-<section data-markdown>
-# Best practises
+<section>
+<h1>&nbsp;</h1>
+<h1>Best Practice</h1>
 </section>
 
 <!-- Next slide ----------- -->
@@ -248,7 +256,7 @@ expect! {
   if content_type.is_a?(Symbol)
     extension = Mime[content_type]
     unless extension
-    <span class="red">raise ArgumentError, "Unknown MIME type #{options[:type]}"</span>
+      <span class="red">raise ArgumentError, "Unknown MIME type #{options[:type]}"</span>
     end
     self.content_type = extension
   else
@@ -292,8 +300,9 @@ end
 
 <!-- Next slide ----------- -->
 
-<section data-markdown>
-# Some examples
+<section>
+<h1>&nbsp;</h1>
+<h1>Some examples</h1>
 </section>
 
 <!-- Next slide ----------- -->
@@ -306,8 +315,9 @@ end
 </p>
 <pre><code># return node describing Twitter identity
 def Twitter.identity(uid, screen_name = nil)
- expect! uid => [Integer, Neo4j::Node],
-  screen_name => [/^[^@]/, nil]
+  expect! uid => [Integer, Neo4j::Node],
+    screen_name => [/^[^@]/, nil]
+
   # ...
 end
 </code></pre>
@@ -328,7 +338,7 @@ end
 <p>Implicit documentation</p>
 <pre style="font-size: 48%"><code># register a tweet.
 def Twitter.register(tweet)
-  expect! options => {
+  expect! tweet => {
     :tweet_id     => Integer,         # The id of the tweet 
     :sender_id    => Integer,         # The twitter user id
     :sender_name  => [String, nil],   # The twitter user screen name
@@ -345,6 +355,7 @@ end
 </section>
 
 <section>
+<h1>&nbsp;</h1>
 <h1>What to expect…</h1>
 <p>…when you are expecting?</p>
 </section>
@@ -371,9 +382,9 @@ expect {
 </section>
 
 <section>
-<h2>Less bugs during development.</h2>
+<h2>Higher productivity.</h2>
 <p><img src="assets/borat.jpg"></p>
-<p>Higher development productivity.</p>
+<p>Less bugs during development.</p>
 </section>
 
 <section data-markdown>

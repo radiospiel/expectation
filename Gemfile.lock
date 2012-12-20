@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    expectation (0.1.1)
+    expectation (0.2.0)
 
 GEM
   remote: http://rubygems.org/

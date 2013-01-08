@@ -24,12 +24,36 @@
 #   end
 
 module Expectation
+  def self.timeout=(timeout)
+    @timeout = timeout
+  end
+
+  def self.timeout
+    @timeout
+  end
+  
   # Verifies a number of expectations. Raises an ArgumentError if one
   # or more expectations are not met.
   #
   # In contrast to Expectation#expect this method can not be
   # disabled at runtime.
   def expect!(*expectations, &block)
+    if block_given? && Expectation.timeout
+      timeout, Expectation.timeout = Expectation.timeout, nil
+      begin
+        (timeout / 0.05).to_i.times do
+          begin
+            expect! *expectations, &block
+            return
+          rescue ArgumentError
+          end
+          Thread.send :sleep, 0.05
+        end
+      ensure
+        Expectation.timeout = timeout
+      end
+    end
+
     if block_given?
       Expectation.verify! true, block
     end

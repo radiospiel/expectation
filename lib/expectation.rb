@@ -25,11 +25,11 @@
 
 module Expectation
   def self.timeout=(timeout)
-    @timeout = timeout
+    Thread.current[:expectation_timeout] = timeout
   end
 
   def self.timeout
-    @timeout
+    Thread.current[:expectation_timeout]
   end
   
   # Verifies a number of expectations. Raises an ArgumentError if one

@@ -26,23 +26,16 @@ end
 #   end
 #
 module Expectation::Assertions
-  alias_method :original_expect!, :expect! #:nodoc:
-
-  def assert_expectation(should_succeed, *expectation, &block) #:nodoc:
-    original_expect! *expectation, &block
-    assert_block { should_succeed }
-  rescue ArgumentError
-    assert_block($!.to_s) { !should_succeed }
-  end
-  
   # verifies the passed in expectations
   def expect!(*expectation, &block)
-    assert_expectation true, *expectation, &block
+    good = Expectation.met_expectations?(*expectation, &block)
+    assert_block(Expectation.last_error) { good }
   end
   
   # verifies the failure of the passed in expectations
   def inexpect!(*expectation, &block)
-    assert_expectation false, *expectation, &block
+    good = Expectation.met_expectations?(*expectation, &block)
+    assert_block("Expectation(s) should fail, but didn't") { !good }
   end
 end
 

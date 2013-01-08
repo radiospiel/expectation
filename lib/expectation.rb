@@ -32,43 +32,27 @@ module Expectation
     Thread.current[:expectation_timeout]
   end
   
-  # Verifies a number of expectations. Raises an ArgumentError if one
-  # or more expectations are not met.
-  #
-  # In contrast to Expectation#expect this method can not be
-  # disabled at runtime.
+  def self.last_error=(error)
+    Thread.current[:expectation_last_error] = error
+  end
+  
+  def self.last_error
+    Thread.current[:expectation_last_error]
+  end
+
   def expect!(*expectations, &block)
-    if block_given? && Expectation.timeout
-      timeout, Expectation.timeout = Expectation.timeout, nil
-      begin
-        (timeout / 0.05).to_i.times do
-          begin
-            expect! *expectations, &block
-            return
-          rescue ArgumentError
-          end
-          Thread.send :sleep, 0.05
-        end
-      ensure
-        Expectation.timeout = timeout
-      end
+    return if Expectation.met_expectations?(*expectations, &block)
+
+    # build exception with adjusted backtrace.
+    backtrace = caller #[3 .. -1]
+
+    e = ArgumentError.new Expectation.last_error
+    e.singleton_class.send(:define_method, :backtrace) do
+      backtrace
     end
 
-    if block_given?
-      Expectation.verify! true, block
-    end
-    
-    expectations.each do |expectation|
-      case expectation
-      when Hash
-        expectation.each do |value, e|
-          Expectation.verify! value, e
-        end
-      else
-        Expectation.verify! expectation, :truish
-      end
-    end
-  end
+    raise e
+  end  
 
   # Verifies a number of expectations. If one or more expectations are 
   # not met it raises an ArgumentError.
@@ -83,6 +67,41 @@ module Expectation
   # Expectation are disabled.
   def expect_dummy!(*expectations, &block) #:nodoc:
   end
+
+  # Verifies a number of expectations. Raises an ArgumentError if one
+  # or more expectations are not met.
+  #
+  # In contrast to Expectation#expect this method can not be
+  # disabled at runtime.
+  def self.met_expectations?(*expectations, &block)
+    return false unless expectations.all? do |expectation|
+      case expectation
+      when Hash
+        expectation.all? { |value, e| Expectation.verify! value, e }
+      else
+        Expectation.verify! expectation, :truish
+      end
+    end
+
+    return true unless block_given? 
+
+    # Dynamic expectation? When Expectation.timeout is set, we test the 
+    # dynamic expectation, i.e. the block, for a certain time period.
+    begin
+      timeout, Expectation.timeout = Expectation.timeout, nil
+
+      runs = timeout ? (timeout / 0.05).to_i : 0
+      runs = 1 if runs < 1
+      
+      runs.times.any? do
+        next true if Expectation.verify! 1, block
+        Thread.send :sleep, 0.05
+        false
+      end
+    ensure
+      Expectation.timeout = timeout
+    end
+  end
   
   # Does a value meet the expectation? Retruns +true+ or +false+. 
   def self.met?(value, expectation) #:nodoc:
@@ -96,8 +115,9 @@ module Expectation
     end
   end
 
-  # Verifies a value against an expectation. Builds and raises
-  # an ArgumentError exception if the expectation is not met.
+  # Verifies a value against an expectation; returns true if ok, 
+  # false if the expectation was not met. In case of an error 
+  # the Expectation.last_error value is set.
   def self.verify!(value, expectation)
     failed_value, failed_expectation, message = value, expectation, nil
     
@@ -117,16 +137,11 @@ module Expectation
     end
     
     # are we good?
-    return if good
-
-    # build exception with adjusted backtrace.
-    backtrace = caller[5 .. -1]
+    return true if good
     
-    e = ArgumentError.new "#{failed_value.inspect} does not meet expectation #{failed_expectation.inspect}#{message && ", #{message}"}"
-    e.singleton_class.send(:define_method, :backtrace) do
-      backtrace
-    end
-    raise e
+    Expectation.last_error = "#{failed_value.inspect} does not meet expectation #{failed_expectation.inspect}#{message && ", #{message}"}"
+
+    return false
   end
 
   # Enable the Expectation#expect method.

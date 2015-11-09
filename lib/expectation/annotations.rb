@@ -79,7 +79,7 @@ class Class
         return if arity >= 0 && count == arity
         return if arity < 0 && count >= -arity
 
-        ArgumentError.raise_with_skipped_entries! 2, "in `#{self}': wrong number of arguments (#{count} for #{-arity})"
+        raise ArgumentError, "in `#{self}': wrong number of arguments (#{count} for #{arity.abs})", caller[2..-1] 
       end
     end
     
@@ -117,7 +117,11 @@ class ::Expectation::Annotations::ExpectationAnnotation
       next unless idx <= args.length
       next unless expectation = expectations[parameter_name]
 
-      Expectation.match! args[idx], expectation
+      begin
+        Expectation.match! args[idx], expectation
+      rescue Expectation::Error
+        $!.reraise_with_backtrace! caller[8..-1]
+      end
     end
   end
   
@@ -137,7 +141,11 @@ class ::Expectation::Annotations::ReturnsAnnotation
   attr :expectation
 
   def after_call(rv, method, receiver, *args, &block)
-    Expectation.match! rv, expectation
+    begin
+      Expectation.match! rv, expectation
+    rescue Expectation::Error
+      $!.reraise_with_backtrace! caller[5..-1]
+    end
   end
   
   def initialize(expectation)

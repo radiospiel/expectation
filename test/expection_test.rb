@@ -4,6 +4,10 @@
 require_relative 'test_helper'
 
 class ExpectationTest < Test::Unit::TestCase
+  def test_expectation_inherits_argument_error
+    assert Expectation::Error < ArgumentError
+  end
+
   #
   # This test covers the usual use case: expectations are 
   # passed in a single Hash.

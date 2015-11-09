@@ -8,7 +8,12 @@ class Exception
   # Create an ArgumentError with an adjusted backtrace. We don't want to 
   # see the user all the annotation internals.
   def reraise_with_current_backtrace!
-    set_backtrace caller[2..-2]
+    set_backtrace caller[2..-1]
+    raise self
+  end
+
+  def reraise_with_backtrace!(backtrace)
+    set_backtrace backtrace
     raise self
   end
 end

@@ -50,8 +50,8 @@ module Expectation
 
   def expect!(*expectations, &block)
     return if Expectation.met_expectations?(*expectations, &block)
-    raise Error, Expectation.last_error
-  end  
+    Error.raise_with_backtrace! caller, Expectation.last_error
+  end
 
   # Verifies a number of expectations. If one or more expectations are 
   # not met it raises an ArgumentError.

@@ -3,6 +3,12 @@
 # Copyright:: Copyright (c) 2011, 2012 radiospiel
 # License::   Distributes under the terms of the Modified BSD License, see LICENSE.BSD for details.
 #++
+
+module Expectation; end
+
+require_relative "core/exception"
+require_relative "expectation/annotations"
+
 # The Expectation module implements methods to verify one or more values
 # against  set of expectations. This is a subset of
 # design-by-contract programming (see http://en.wikipedia.org/wiki/Design_by_contract)
@@ -24,6 +30,8 @@
 #   end
 
 module Expectation
+  Error = ArgumentError
+
   def self.timeout=(timeout)
     Thread.current[:expectation_timeout] = timeout
   end
@@ -42,16 +50,7 @@ module Expectation
 
   def expect!(*expectations, &block)
     return if Expectation.met_expectations?(*expectations, &block)
-
-    # build exception with adjusted backtrace.
-    backtrace = caller #[3 .. -1]
-
-    e = ArgumentError.new Expectation.last_error
-    e.singleton_class.send(:define_method, :backtrace) do
-      backtrace
-    end
-
-    raise e
+    raise Error, Expectation.last_error
   end  
 
   # Verifies a number of expectations. If one or more expectations are 

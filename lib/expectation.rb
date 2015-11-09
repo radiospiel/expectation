@@ -7,7 +7,6 @@
 module Expectation; end
 
 require_relative "core/exception"
-require_relative "expectation/annotations"
 require_relative "expectation/assertions"
 
 # The Expectation module implements methods to verify one or more values

@@ -24,136 +24,69 @@
 #   end
 
 module Expectation
-  def self.timeout=(timeout)
-    Thread.current[:expectation_timeout] = timeout
+  class MismatchError < ArgumentError
+    attr :value, :expectation, :info
+
+    def initialize(value, expectation, info = nil)
+      @value, @expectation, @info = value, expectation, info
+    end
+    
+    def to_s
+      msg = "#{value.inspect} does not match #{expectation.inspect}"
+      msg += ", #{info}" if info
+      msg
+    end
   end
 
-  def self.timeout
-    Thread.current[:expectation_timeout]
-  end
-  
-  def self.last_error=(error)
-    Thread.current[:expectation_last_error] = error
-  end
-  
-  def self.last_error
-    Thread.current[:expectation_last_error]
-  end
-
+  #
+  # Verifies a number of expectations. If one or more expectations are 
+  # not met it raises an ArgumentError. This method cannot be disabled.
   def expect!(*expectations, &block)
-    return if Expectation.met_expectations?(*expectations, &block)
-
-    # build exception with adjusted backtrace.
-    backtrace = caller #[3 .. -1]
-
-    e = ArgumentError.new Expectation.last_error
-    e.singleton_class.send(:define_method, :backtrace) do
-      backtrace
+    STDERR.puts "*** expect! #{expectations.inspect}"
+    
+    expectations.each do |expectation|
+      if expectation.is_a?(Hash)
+        match! expectation, :__hash
+      else
+        match! expectation, :truish
+      end
     end
 
-    raise e
+    match! block, :__block if block
   end  
 
-  # Verifies a number of expectations. If one or more expectations are 
-  # not met it raises an ArgumentError.
-  #
-  # This method can be enabled or disabled at runtime using 
-  # Expectation.enable and Expectation.disable.  
-  def expect(*expectations, &block)
-    expect!(*expectations, &block)
-  end
-  
-  # A do nothing expect method. This is the standin for expect, when
-  # Expectation are disabled.
-  def expect_dummy!(*expectations, &block) #:nodoc:
-  end
-
-  # Verifies a number of expectations. Raises an ArgumentError if one
-  # or more expectations are not met.
-  #
-  # In contrast to Expectation#expect this method can not be
-  # disabled at runtime.
-  def self.met_expectations?(*expectations, &block)
-    return false unless expectations.all? do |expectation|
-      case expectation
-      when Hash
-        expectation.all? { |value, e| Expectation.verify! value, e }
-      else
-        Expectation.verify! expectation, :truish
-      end
-    end
-
-    return true unless block_given? 
-
-    # Dynamic expectation? When Expectation.timeout is set, we test the 
-    # dynamic expectation, i.e. the block, for a certain time period.
-    begin
-      timeout, Expectation.timeout = Expectation.timeout, nil
-
-      runs = timeout ? (timeout / 0.05).to_i : 0
-      runs = 1 if runs < 1
-      
-      runs.times.any? do
-        next true if Expectation.verify! 1, block
-        Thread.send :sleep, 0.05
-        false
-      end
-    ensure
-      Expectation.timeout = timeout
-    end
-  end
-  
-  # Does a value meet the expectation? Retruns +true+ or +false+. 
-  def self.met?(value, expectation) #:nodoc:
-    case expectation
-    when :truish  then !!value
-    when :fail    then false
-    when Array    then expectation.any? { |e| met?(value, e) }
-    when Proc     then expectation.arity == 0 ? expectation.call : expectation.call(value)
-    when Regexp   then value.is_a?(String) && expectation =~ value
-    else          expectation === value
-    end
-  end
-
-  # Verifies a value against an expectation; returns true if ok, 
-  # false if the expectation was not met. In case of an error 
-  # the Expectation.last_error value is set.
-  def self.verify!(value, expectation)
-    failed_value, failed_expectation, message = value, expectation, nil
+  # Matches a value against an expectation. Returns true or false.
+  def match?(value, expectation)
+    STDERR.puts "*** match? #{value.inspect} vs #{expectation.inspect}"
     
-    # Test expectation, collect failed_value, failed_expectation, failed_message
-    unless expectation.is_a?(Hash)
-      good = met?(value, expectation)
-    else
-      good = met?(value, Hash)
-      if good
-        good = expectation.all? do |key, expect|
-          next true if met?(value[key], expect)
-          
-          failed_value, failed_expectation, message = value[key], expect, "at key #{key.inspect}"
-          false
+    match = case expectation
+      when :truish  then !!value
+      when :fail    then false
+      when Array    then expectation.any? { |e| match?(value, e) }
+      when Proc     then expectation.arity == 0 ? expectation.call : expectation.call(value)
+      when Regexp   then value.is_a?(String) && expectation =~ value
+      when :__block then
+        value.call
+      when :__hash  then
+        STDERR.puts "*** match hash: #{value.inspect}"
+        value.all? do |actual, exp|
+          match? actual, exp
         end
-      end
+      else          
+        STDERR.puts "*** unspecified match? #{value.inspect} vs #{expectation.inspect}"
+        expectation === value
     end
     
-    # are we good?
-    return true if good
-    
-    Expectation.last_error = "#{failed_value.inspect} does not meet expectation #{failed_expectation.inspect}#{message && ", #{message}"}"
-
-    return false
+    STDERR.puts "!!! match? #{value.inspect} vs #{expectation.inspect}: #{match.inspect}"
+    !! match
   end
+  
+  def match!(value, expectation) #:nodoc:#
+    STDERR.puts "*** match! #{expectation.inspect} vs #{value.inspect}"
 
-  # Enable the Expectation#expect method.
-  def self.enable
-    alias_method :expect, :expect!
-  end
-
-  # Disable the Expectation#expect method.
-  def self.disable
-    alias_method :expect, :expect_dummy!
+    return if match? value, expectation
+    raise MismatchError, value, expectation
   end
 end
 
-Expectation.enable
 Object.send :include, Expectation

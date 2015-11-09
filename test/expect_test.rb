@@ -50,7 +50,7 @@ class ExpectationTest < Test::Unit::TestCase
     assert_expectation! 1 => 1..10
     assert_expectation! 1 => [0,1,2]
     assert_expectation! 1 => lambda { |i| i.odd? }
-    
+
     assert_failed_expectation! 1 => 2
     assert_failed_expectation! 1 => Float
     assert_failed_expectation! 1 => 0...1
@@ -102,18 +102,5 @@ class ExpectationTest < Test::Unit::TestCase
     assert_expectation!({ :key => "Foo" } => { :key => [Integer,String] })
     assert_failed_expectation!({ :key => "Foo" } => { :key => [Integer,"Bar"] })
     assert_expectation!({ :other_key => "Foo" } => { :key => [nil, "Foo"] })
-  end
-
-  def test_enable_and_disable
-    assert_failed_expectation! "foo" => "bar"
-    assert_failed_expectation "foo" => "bar"
-
-    Expectation.disable
-    assert_failed_expectation! "foo" => "bar"
-    assert_expectation "foo" => "bar"
-
-    Expectation.enable
-    assert_failed_expectation! "foo" => "bar"
-    assert_failed_expectation "foo" => "bar"
   end
 end

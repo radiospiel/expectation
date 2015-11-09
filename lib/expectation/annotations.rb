@@ -116,9 +116,8 @@ class ::Expectation::Annotations::ExpectationAnnotation
     method.parameter_names.each_with_index do |parameter_name, idx|
       next unless idx <= args.length
       next unless expectation = expectations[parameter_name]
-      next if Expectation.verify! args[idx], expectation
-      
-      Expectation::Error.raise_with_skipped_entries! 7, "#{Expectation.last_error}, in call to #{method}"
+
+      Expectation.match! args[idx], expectation
     end
   end
   
@@ -138,8 +137,7 @@ class ::Expectation::Annotations::ReturnsAnnotation
   attr :expectation
 
   def after_call(rv, method, receiver, *args, &block)
-    return if Expectation.verify! rv, expectation
-    Expectation::Error.raise_with_skipped_entries! 2, "Invalid return value from #{method}: #{Expectation.last_error}"
+    Expectation.match! rv, expectation
   end
   
   def initialize(expectation)

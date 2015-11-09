@@ -53,14 +53,14 @@ module Expectation
     expectations.each do |expectation|
       if expectation.is_a?(Hash)
         expectation.all? do |actual, exp|
-          _match! actual, exp
+          match! actual, exp
         end
       else
-        _match! expectation, :truish
+        match! expectation, :truish
       end
     end
 
-    _match! block, :__block if block
+    match! block, :__block if block
   rescue Error
     $!.reraise_with_current_backtrace!
   end  
@@ -68,17 +68,15 @@ module Expectation
   #
   # Does a value match an expectation?
   def match?(value, expectation)
-    _match! value, expectation
+    match! value, expectation
     true
   rescue Error
     false
   end
 
-  private
-
   # Matches a value against an expectation. Raises an Expectation::Error
   # if the expectation could not be matched.
-  def _match!(value, expectation, key=nil)
+  def match!(value, expectation, key=nil)
     match = case expectation
       when :truish  then !!value
       when :fail    then false
@@ -87,7 +85,7 @@ module Expectation
       when Regexp   then value.is_a?(String) && expectation =~ value
       when :__block then value.call
       when Hash     then Hash === value && 
-                         expectation.each { |key, exp| _match! value[key], exp, key }
+                         expectation.each { |key, exp| match! value[key], exp, key }
       else               expectation === value
     end
 
@@ -96,8 +94,10 @@ module Expectation
     raise Error.new(value, expectation, key && "at key #{key.inspect}")
   end
 
+  private
+
   def _match?(value, expectation)
-    _match! value, expectation
+    match! value, expectation
     true
   rescue Error
     false

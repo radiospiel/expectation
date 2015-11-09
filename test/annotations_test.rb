@@ -7,13 +7,13 @@ class AnnotationsTest < Test::Unit::TestCase
   class Foo
     enable_annotations!
 
-    expects! a: 1
-    def f(a, b, c)
-      [ a, b, c]
+    +Expects(a: 1)
+    def sum(a, b, c)
+      a + b + c
     end
 
-    returns! 2
-    def g(r)
+    +Returns(2)
+    def returns_arg(r)
       r
     end
   end
@@ -25,30 +25,30 @@ class AnnotationsTest < Test::Unit::TestCase
   end
 
   def test_annotations_check_number_of_arguments
-    e = assert_raise(ArgumentError) {  
-      foo.f(1)        # scripts/test:67:in `f': wrong number of arguments (1 for 3) (ArgumentError)
+    e = assert_raise(ArgumentError) {
+      foo.sum(1)        # scripts/test:67:in `f': wrong number of arguments (1 for 3) (ArgumentError)
     }
     assert e.backtrace.first.include?("test/annotations_test.rb:")
   end
 
   def test_expects_annotation
-    assert_nothing_raised() { 
-      foo.f(1,2,3)
-    }
+    rv = nil
+    assert_nothing_raised() { rv = foo.sum(1,2,3) }
+    assert_equal(rv, 6)
 
-    e = assert_raise(Expectation::Error) {  
-      foo.f(2,2,3)
+    e = assert_raise(ArgumentError) {  
+      foo.sum(2,2,3)
     }
     assert e.backtrace.first.include?("test/annotations_test.rb:")
   end
 
   def test_returns_annotation
-    assert_nothing_raised() {  
-      foo.g(2)
+    assert_nothing_raised() {
+      foo.returns_arg(2)
     }
 
-    e = assert_raise(Expectation::Error) {  
-      foo.g(1)
+    e = assert_raise(ArgumentError) {
+      foo.returns_arg(1)
     }
     assert e.backtrace.first.include?("test/annotations_test.rb:")
   end

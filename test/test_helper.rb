@@ -2,14 +2,19 @@ require 'rubygems'
 require 'bundler/setup'
 
 require 'simplecov'
+require 'simplecov-console'
 require 'test/unit'
 
 SimpleCov.start do
   add_filter "test/*.rb"
 end
 
-require "expectation"
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  SimpleCov::Formatter::HTMLFormatter,
+  SimpleCov::Formatter::Console,
+]
 
+require "expectation"
 
 class Test::Unit::TestCase
   def assert_expectation!(*expectation, &block)

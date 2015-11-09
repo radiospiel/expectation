@@ -11,10 +11,5 @@ class Exception
     set_backtrace caller[2..-1]
     raise self
   end
-
-  def reraise_with_backtrace!(backtrace)
-    set_backtrace backtrace
-    raise self
-  end
 end
 

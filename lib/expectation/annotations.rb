@@ -17,8 +17,8 @@
 #
 #   class Foo
 #
-#     expects! value1: Fixnum, value2: /.@./
-#     returns! Fixnum
+#     +Expects(value1: Fixnum, value2: /.@./)
+#     +Returns(Fixnum)
 #
 #     def bar(value1, value2)
 #     end
@@ -29,77 +29,65 @@ end
 
 class Class
   module Annotations
-    class AnnotatedMethod
-      attr :method
+    def self.current_annotations
+      Thread.current[:current_annotations] ||= []
+    end
 
-      def initialize
-        @before_annotations = []
-        @after_annotations = []
-      end
-    
-      def method=(method)
-        @method          = method
-        @parameter_names = method.parameters.map(&:last)
-        @arity           = method.arity
+    def self.consume_current_annotations
+      r, Thread.current[:current_annotations] = Thread.current[:current_annotations], nil
+      r
+    end
+
+    class Base
+      def +@
+        Class::Annotations.current_annotations << self
       end
 
-      def <<(annotation)
-        @before_annotations << annotation if annotation.methods.include?(:before_call)
-        @after_annotations << annotation if annotation.methods.include?(:after_call)
-      end
-      
+      # contains the unbound method once the Base object is initialized
+      attr :method, true
+
       def to_s
         "#{method.owner}##{method.name}"
       end
+    end
 
-      attr :before_annotations
-      attr :after_annotations
-      attr :parameter_names
-      attr :arity
-      
-      def invoke(receiver, *args, &block)
-        verify_number_of_arguments! args.count
-        
-        before_annotations.each do |annotation|
-          annotation.before_call(self, receiver, *args, &block)
+    class AnnotatedMethod
+      def initialize(method, annotations)
+        @method = method
+
+        @before_annotations = annotations.select { |annotation| annotation.respond_to?(:before_call) }
+        @after_annotations  = annotations.select { |annotation| annotation.respond_to?(:after_call) }
+
+        annotations.each do |annotation|
+          annotation.method = method
+        end
+      end
+
+      def invoke(receiver, *args, &blk)
+        @before_annotations.each do |annotation|
+          annotation.before_call(receiver, *args, &blk)
         end
 
-        rv = method.bind(receiver).call(*args, &block)
+        rv = @method.bind(receiver).call(*args, &blk)
 
-        after_annotations.each do |annotation|
-          annotation.after_call(rv, self, receiver, *args, &block)
+        @after_annotations.each do |annotation|
+          annotation.after_call(rv, receiver, *args, &blk)
         end
 
         rv
       end
-      
-      private
-      
-      def verify_number_of_arguments!(count)
-        return if arity >= 0 && count == arity
-        return if arity < 0 && count >= -arity
-
-        raise ArgumentError, "in `#{self}': wrong number of arguments (#{count} for #{arity.abs})", caller[2..-1] 
-      end
     end
-    
+
     private
 
-    def __consume__annotated_method
-      r, @__annotated_method = @__annotated_method, nil
-      r
-    end
-    
-    def __annotated_method
-      @__annotated_method ||= AnnotatedMethod.new
-    end
-
     def method_added(name)
-      return unless __annotated_method = __consume__annotated_method
+      return unless annotations = Class::Annotations.consume_current_annotations
 
-      __annotated_method.method = instance_method(name)
-      define_method name do |*args, &block|
-        __annotated_method.invoke self, *args, &block
+      method = instance_method(name)
+      annotated_method = AnnotatedMethod.new(method, annotations)
+
+      define_method name do |*args, &blk|
+        annotated_method.invoke self, *args, &blk
       end
     end
   end
@@ -109,52 +97,45 @@ class Class
   end
 end
 
-class ::Expectation::Annotations::ExpectationAnnotation
+class ::Expectation::Annotations::ExpectationAnnotation < ::Class::Annotations::Base
   attr :expectations
 
-  def before_call(method, receiver, *args, &block)
-    method.parameter_names.each_with_index do |parameter_name, idx|
-      next unless idx <= args.length
-      next unless expectation = expectations[parameter_name]
-
-      begin
-        Expectation.match! args[idx], expectation
-      rescue Expectation::Error
-        $!.reraise_with_backtrace! caller[8..-1]
-      end
-    end
-  end
-  
   def initialize(expectations)
     @expectations = expectations
   end
-end
 
-module Class::Annotations
-  def expects!(expectation)
-    expect! expectation => Hash
-    __annotated_method << ::Expectation::Annotations::ExpectationAnnotation.new(expectation)
+  def before_call(receiver, *args, &blk)
+    @parameter_names ||= method.parameters.map(&:last)
+
+    @parameter_names.each_with_index do |parameter_name, idx|
+      next unless expectation = expectations[parameter_name]
+
+      Expectation.match! args[idx], expectation
+    end
+  rescue Expectation::Error
+    raise ArgumentError, "#{$!} in call to `#{self}`", caller[5..-1]
   end
 end
 
-class ::Expectation::Annotations::ReturnsAnnotation
+class ::Expectation::Annotations::ReturnsAnnotation < ::Class::Annotations::Base
   attr :expectation
 
-  def after_call(rv, method, receiver, *args, &block)
-    begin
-      Expectation.match! rv, expectation
-    rescue Expectation::Error
-      $!.reraise_with_backtrace! caller[5..-1]
-    end
-  end
-  
   def initialize(expectation)
     @expectation = expectation
   end
+
+  def after_call(rv, method, receiver, *args, &blk)
+    Expectation.match! rv, expectation
+  rescue Expectation::Error
+    raise ArgumentError, "#{$!} in return of `#{self}`", caller[5..-1]
+  end
 end
 
-module Class::Annotations
-  def returns!(expectation)
-    __annotated_method << ::Expectation::Annotations::ReturnsAnnotation.new(expectation)
-  end
+def Expects(expectation)
+  expect! expectation => Hash
+  ::Expectation::Annotations::ExpectationAnnotation.new(expectation)
+end
+
+def Returns(expectation)
+  ::Expectation::Annotations::ReturnsAnnotation.new(expectation)
 end

@@ -75,15 +75,16 @@ module Contracts
 
   module ClassMethods
     def method_added(name)
-      # [fixme] call super
-      return unless annotations = Contracts.consume_current_contracts
+      if annotations = Contracts.consume_current_contracts
+        method = instance_method(name)
+        annotated_method = Contracts::AnnotatedMethod.new(method, annotations)
 
-      method = instance_method(name)
-      annotated_method = Contracts::AnnotatedMethod.new(method, annotations)
-
-      define_method name do |*args, &blk|
-        annotated_method.invoke self, *args, &blk
+        define_method name do |*args, &blk|
+          annotated_method.invoke self, *args, &blk
+        end
       end
+
+      super
     end
   end
 

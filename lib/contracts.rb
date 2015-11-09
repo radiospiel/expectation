@@ -57,13 +57,15 @@ module Contracts
       @before_annotations.each do |annotation|
         annotation.before_call(receiver, *args, &blk)
       end
- 
-      rv = @method.bind(receiver).call(*args, &blk)
- 
+
+      # instance methods are UnboundMethod, class methods are Method.
+      rv = @method.is_a?(Method) ? @method.call(*args, &blk)
+                                 : @method.bind(receiver).call(*args, &blk)
+
       @after_annotations.each do |annotation|
         annotation.after_call(rv, receiver, *args, &blk)
       end
- 
+
       return rv
     rescue StandardError => exc
       @exception_annotations.each do |annotation|
@@ -74,6 +76,21 @@ module Contracts
   end
 
   module ClassMethods
+    def singleton_method_added(name)
+      if annotations = Contracts.consume_current_contracts
+        method = singleton_method(name)
+        annotated_method = Contracts::AnnotatedMethod.new(method, annotations)
+
+        klass = self
+
+        define_singleton_method name do |*args, &blk|
+          annotated_method.invoke klass, *args, &blk
+        end
+      end
+
+      super
+    end
+
     def method_added(name)
       if annotations = Contracts.consume_current_contracts
         method = instance_method(name)
@@ -98,14 +115,22 @@ module Contracts
     end
 
     #
-    # contains the unbound method once the contract is initialized, which happens
-    # in the Class#method_added callback.
+    # contains the method once the contract is initialized, which happens
+    # in the Class#{singleton_,}method_added callback.
     attr :method, true
 
     #
-    # Returns a description of the method 
+    # Returns a description of the method; i.e. Class#name or Class.name
     def method_name
-      "#{method.owner}##{method.name}"
+      if method.is_a?(Method)                               # A singleton method?
+        # The method owner is the singleton class of the class. Sadly, the
+        # the singleton class has no name; hence we try to construct the name
+        # from its to_s description.
+        klass_name = method.owner.to_s.gsub(/#<(.*?):(.*)>/, "\\2")
+        "#{klass_name}.#{method.name}"
+      else
+        "#{method.owner}##{method.name}"
+      end
     end
   end
 end

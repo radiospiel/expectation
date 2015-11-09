@@ -2,7 +2,7 @@
 
 $: << "File.dirname(__FILE__)/../lib"
 
-require "contract"
+require "contracts"
 
 class Foo
   include Contracts
@@ -17,7 +17,21 @@ class Foo
   def f(a, b, c)
     [ a, b, c]
   end
+  
+  +Expects(one: 1)
+  def self.klass_method(one)
+    one * 2
+  end
 end
+
+p Foo.singleton_class
+#.name
+
+puts Contracts.current_contracts.count
+puts Foo.klass_method 1
+puts Foo.klass_method 2
+
+puts "fini"
 
 foo = Foo.new
 

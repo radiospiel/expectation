@@ -4,78 +4,64 @@
 require_relative 'test_helper'
 
 class MatchingTest < Test::Unit::TestCase
-  def assert_expectation!(*expectation, &block)
-    assert_nothing_raised do
-      expect! *expectation, &block
-    end
+  def assert_match!(value, expectation)
+    assert_equal true, Expectation.match?(value, expectation)
   end
 
-  def assert_failed_expectation!(*expectation, &block)
-    assert_raise(Expectation::Error) {
-      expect! *expectation, &block
-    }
+  def assert_mismatch!(value, expectation)
+    assert_equal false, Expectation.match?(value, expectation)
   end
 
   def test_int_expectations
-    assert_expectation! 1 => 1
-    assert_expectation! 1 => Fixnum
-    assert_expectation! 1 => Integer
-    assert_expectation! 1 => 0..2
-    assert_expectation! 1 => 0..1
-    assert_expectation! 1 => 1..10
-    assert_expectation! 1 => [0,1,2]
-    assert_expectation! 1 => lambda { |i| i.odd? }
+    assert_match! 1, 1
+    assert_match! 1, Fixnum
+    assert_match! 1, Integer
+    assert_match! 1, 0..2
+    assert_match! 1, 0..1
+    assert_match! 1, 1..10
+    assert_match! 1, [0,1,2]
 
-    assert_failed_expectation! 1 => 2
-    assert_failed_expectation! 1 => Float
-    assert_failed_expectation! 1 => 0...1
-    assert_failed_expectation! 1 => 3..5
-    assert_failed_expectation! 1 => [3,4,5]
-    assert_failed_expectation! 1 => lambda { |i| i.even? }
+    assert_mismatch! 1, 2
+    assert_mismatch! 1, Float
+    assert_mismatch! 1, 0...1
+    assert_mismatch! 1, 3..5
+    assert_mismatch! 1, [3,4,5]
+  end
+
+  def test_lambda_expectations
+    # passes in value?
+    assert_match! 1, lambda { |i| i.odd? }
+    assert_mismatch! 1, lambda { |i| i.even? }
+
+    # does not pass in a value
+    r = false
+    assert_mismatch! 1, lambda { r }
+
+    r = true
+    assert_match! 1, lambda { r }
   end
 
   def test_regexp_expectations
-    assert_expectation! " foo" => /foo/
-    assert_failed_expectation! " foo" => /^foo/
+    assert_match!    " foo", /foo/
+    assert_mismatch! " foo", /^foo/
 
-    assert_expectation! "1" => /1/
-    assert_failed_expectation! "1" => /2/
+    assert_match!    "1", /1/
+    assert_mismatch! "1", /2/
 
-    assert_failed_expectation! 1 => /1/
-    assert_failed_expectation! 1 => /2/
-  end
-
-  def test_multiple_expectations
-    assert_expectation! 1 => 1, :a => :a
-    assert_failed_expectation! 1 => 2, :a => :a
-  end
-
-  def test_array_expectations
-    assert_expectation! 1, 1, 1, /1/
-    assert_expectation! 1, 1, "1" => /1/
-
-    assert_failed_expectation! 1, 1, "1" => /2/
-    assert_failed_expectation! 1, 1, 1 => /2/
-    assert_failed_expectation! 1, nil, "1" => /1/
-    assert_failed_expectation! 1, false, "1" => /1/
-  end
-
-  def test_block_expectations
-    assert_expectation! do true end
-    assert_failed_expectation! do false end
-    assert_failed_expectation! do nil end
+    assert_mismatch! 1, /1/
+    assert_mismatch! 1, /2/
   end
 
   def test_hash_expectations
-    assert_failed_expectation!({} => { :key => "Foo" })
-    assert_expectation!({ :key => "Foo" } => { :key => "Foo" })
+    assert_mismatch!({}, { :key => "Foo" })
+    assert_match!({ :key => "Foo" }, { :key => "Foo" })
 
-    assert_failed_expectation!({ :other_key => "Foo" } => { :key => "Foo" })
-    assert_failed_expectation!({ :key => "Bar" } => { :key => "Foo" })
+    assert_mismatch!({ :other_key => "Foo" }, { :key => "Foo" })
+    assert_mismatch!({ :key => "Bar" }, { :key => "Foo" })
 
-    assert_expectation!({ :key => "Foo" } => { :key => String })
-    assert_expectation!({ :key => "Foo" } => { :key => [Integer,String] })
-    assert_failed_expectation!({ :key => "Foo" } => { :key => [Integer,"Bar"] })
-    assert_expectation!({ :other_key => "Foo" } => { :key => [nil, "Foo"] })
+    assert_match!({ :key => "Foo" }, { :key => String })
+    assert_match!({ :key => "Foo" }, { :key => [Integer,String] })
+    assert_mismatch!({ :key => "Foo" }, { :key => [Integer,"Bar"] })
+    assert_match!({ :other_key => "Foo" }, { :key => [nil, "Foo"] })
   end
 end

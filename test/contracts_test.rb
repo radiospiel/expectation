@@ -3,9 +3,11 @@
 # License::   Distributes under the terms  of the Modified BSD License, see LICENSE.BSD for details.
 require_relative 'test_helper'
 
-class AnnotationsTest < Test::Unit::TestCase
+require "contracts"
+
+class ContractsTest < Test::Unit::TestCase
   class Foo
-    enable_annotations!
+    include Contracts
 
     +Expects(a: 1)
     def sum(a, b, c)
@@ -16,40 +18,71 @@ class AnnotationsTest < Test::Unit::TestCase
     def returns_arg(r)
       r
     end
+
+    +Expects(v: Fixnum)
+    def throw_on_one(v)
+      raise if v == 1
+    end
+
+    +Nothrow()
+    def unexpected_throw_on_one(v)
+      raise if v == 1
+    end
   end
 
   attr :foo
-  
+
   def setup
     @foo = Foo.new
   end
 
-  def test_annotations_check_number_of_arguments
+  def test_contracts_check_number_of_arguments
     e = assert_raise(ArgumentError) {
       foo.sum(1)        # scripts/test:67:in `f': wrong number of arguments (1 for 3) (ArgumentError)
     }
-    assert e.backtrace.first.include?("test/annotations_test.rb:")
+    assert e.backtrace.first.include?("test/contracts_test.rb:")
   end
 
-  def test_expects_annotation
+  def test_expects_contract
     rv = nil
     assert_nothing_raised() { rv = foo.sum(1,2,3) }
     assert_equal(rv, 6)
 
-    e = assert_raise(ArgumentError) {  
+    e = assert_raise(Contracts::Error) {
       foo.sum(2,2,3)
     }
-    assert e.backtrace.first.include?("test/annotations_test.rb:")
+    assert e.backtrace.first.include?("test/contracts_test.rb:")
   end
 
-  def test_returns_annotation
+  def test_returns_contract
     assert_nothing_raised() {
       foo.returns_arg(2)
     }
 
-    e = assert_raise(ArgumentError) {
+    e = assert_raise(Contracts::Error) {
       foo.returns_arg(1)
     }
-    assert e.backtrace.first.include?("test/annotations_test.rb:")
+    assert e.backtrace.first.include?("test/contracts_test.rb:")
+  end
+
+  def test_nothrow_contract
+    assert_nothing_raised() {
+      foo.unexpected_throw_on_one(2)
+    }
+
+    e = assert_raise(Contracts::Error) {
+      foo.unexpected_throw_on_one(1)
+    }
+    assert e.backtrace.first.include?("test/contracts_test.rb:")
+  end
+
+  def test_still_throws_fine
+    assert_nothing_raised() {
+      foo.throw_on_one(2)
+    }
+
+    assert_raise(RuntimeError) {
+      foo.throw_on_one(1)
+    }
   end
 end

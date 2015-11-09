@@ -9,9 +9,9 @@ class ExpectationTest < Test::Unit::TestCase
       expect! *expectation, &block
     end
   end
-  
+
   def assert_failed_expectation!(*expectation, &block)
-    assert_raise(Expectation::Error) {  
+    assert_raise(Expectation::Error) {
       expect! *expectation, &block
     }
   end
@@ -21,26 +21,13 @@ class ExpectationTest < Test::Unit::TestCase
       expect *expectation, &block
     end
   end
-  
+
   def assert_failed_expectation(*expectation, &block)
-    assert_raise(ArgumentError) {  
+    assert_raise(ArgumentError) {
       expect *expectation, &block
     }
   end
-  
-  # Verify that the exception's backtrace is properly adjusted,
-  # i.e. points to this file.
-  def test_expectations_backtrace
-    backtrace = nil
 
-    begin
-      expect! 1 => 0
-    rescue
-      backtrace = $!.backtrace
-    end
-    assert backtrace.first.include?("/expect_test.rb:")
-  end
-  
   def test_int_expectations
     assert_expectation! 1 => 1
     assert_expectation! 1 => Fixnum
@@ -58,7 +45,7 @@ class ExpectationTest < Test::Unit::TestCase
     assert_failed_expectation! 1 => [3,4,5]
     assert_failed_expectation! 1 => lambda { |i| i.even? }
   end
-  
+
   def test_regexp_expectations
     assert_expectation! " foo" => /foo/
     assert_failed_expectation! " foo" => /^foo/
@@ -69,7 +56,7 @@ class ExpectationTest < Test::Unit::TestCase
     assert_failed_expectation! 1 => /1/
     assert_failed_expectation! 1 => /2/
   end
-  
+
   def test_multiple_expectations
     assert_expectation! 1 => 1, :a => :a
     assert_failed_expectation! 1 => 2, :a => :a
@@ -78,7 +65,7 @@ class ExpectationTest < Test::Unit::TestCase
   def test_array_expectations
     assert_expectation! 1, 1, 1, /1/
     assert_expectation! 1, 1, "1" => /1/
-    
+
     assert_failed_expectation! 1, 1, "1" => /2/
     assert_failed_expectation! 1, 1, 1 => /2/
     assert_failed_expectation! 1, nil, "1" => /1/

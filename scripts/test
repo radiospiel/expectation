@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+$: << "File.dirname(__FILE__)/../lib"
+
+require "expectation"
+require "expectation/annotations"
+
+
+class Foo
+  enable_annotations!
+
+  expects! a: 1
+  returns! Array
+  def f(a, b, c)
+    [ a, b, c]
+  end
+end
+
+Foo.new.f(1,2,3)
+Foo.new.f(2,2,3)
+Foo.new.f(1)        # scripts/test:67:in `f': wrong number of arguments (1 for 3) (ArgumentError)
+

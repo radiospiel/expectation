@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+$: << "File.dirname(__FILE__)/../lib"
+
+require "expectation"
+require "expectation/annotations"
+require "irb"
+IRB.start

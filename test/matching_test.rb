@@ -3,7 +3,7 @@
 # License::   Distributes under the terms  of the Modified BSD License, see LICENSE.BSD for details.
 require_relative 'test_helper'
 
-class ExpectationTest < Test::Unit::TestCase
+class MatchingTest < Test::Unit::TestCase
   def assert_expectation!(*expectation, &block)
     assert_nothing_raised do
       expect! *expectation, &block
@@ -13,18 +13,6 @@ class ExpectationTest < Test::Unit::TestCase
   def assert_failed_expectation!(*expectation, &block)
     assert_raise(Expectation::Error) {
       expect! *expectation, &block
-    }
-  end
-
-  def assert_expectation(*expectation, &block)
-    assert_nothing_raised do
-      expect *expectation, &block
-    end
-  end
-
-  def assert_failed_expectation(*expectation, &block)
-    assert_raise(ArgumentError) {
-      expect *expectation, &block
     }
   end
 

@@ -47,11 +47,13 @@ module Expectation
 
   #
   # Verifies a number of expectations. If one or more expectations are 
-  # not met it raises an ArgumentError. This method cannot be disabled.
+  # not met it raises an ArgumentError (on the first failing expectation).
   def expect!(*expectations, &block)
     expectations.each do |expectation|
       if expectation.is_a?(Hash)
-        _match! expectation, :__hash
+        expectation.all? do |actual, exp|
+          _match! actual, exp
+        end
       else
         _match! expectation, :truish
       end
@@ -62,6 +64,17 @@ module Expectation
     $!.reraise_with_current_backtrace!
   end  
 
+  #
+  # Does a value match an expectation?
+  def match?(value, expectation)
+    _match! value, expectation
+    true
+  rescue Error
+    false
+  end
+
+  private
+
   # Matches a value against an expectation. Raises an Expectation::Error
   # if the expectation could not be matched. Returns true if there is a match.
   def _match!(value, expectation)
@@ -71,13 +84,7 @@ module Expectation
       when Array    then expectation.any? { |e| _match?(value, e) }
       when Proc     then expectation.arity == 0 ? expectation.call : expectation.call(value)
       when Regexp   then value.is_a?(String) && expectation =~ value
-      when :__block then
-        value.call
-      when :__hash  then
-        raise ArgumentError unless value.is_a?(Hash)
-        value.all? do |actual, exp|
-          _match! actual, exp
-        end
+      when :__block then value.call
       when Hash  then
         Hash === value && begin
           expectation.all? do |key, exp|
@@ -98,19 +105,6 @@ module Expectation
     true
   rescue Error
     false
-  end
-
-  def match?(value, expectation)
-    _match! value, expectation
-    true
-  rescue Error
-    false
-  end
-
-  def match!(value, expectation)
-    _match! value, expectation
-  rescue Error
-    $!.reraise_with_current_backtrace!
   end
 end
 

@@ -43,4 +43,12 @@ class ExpectationTest < Test::Unit::TestCase
     assert_failed_expectation! do false end
     assert_failed_expectation! do nil end
   end
+
+  def test_exception_message
+    e = assert_failed_expectation!({ 1 => 2 })
+    assert e.message.include?("1 does not match 2")
+
+    e = assert_failed_expectation!({ a: { b: "c" }} => { a: { b: "d" }})
+    assert e.message.include?("\"c\" does not match \"d\", at key :b")
+  end
 end

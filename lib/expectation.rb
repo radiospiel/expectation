@@ -77,8 +77,8 @@ module Expectation
   private
 
   # Matches a value against an expectation. Raises an Expectation::Error
-  # if the expectation could not be matched. Returns true if there is a match.
-  def _match!(value, expectation)
+  # if the expectation could not be matched.
+  def _match!(value, expectation, key=nil)
     match = case expectation
       when :truish  then !!value
       when :fail    then false
@@ -86,19 +86,14 @@ module Expectation
       when Proc     then expectation.arity == 0 ? expectation.call : expectation.call(value)
       when Regexp   then value.is_a?(String) && expectation =~ value
       when :__block then value.call
-      when Hash  then
-        Hash === value && begin
-          expectation.all? do |key, exp|
-            _match? value[key], exp
-          end
-        end
-      else
-        expectation === value
+      when Hash     then Hash === value && 
+                         expectation.each { |key, exp| _match! value[key], exp, key }
+      else               expectation === value
     end
 
-    return true if match
+    return if match
 
-    raise Error.new(value, expectation)
+    raise Error.new(value, expectation, key && "at key #{key.inspect}")
   end
 
   def _match?(value, expectation)

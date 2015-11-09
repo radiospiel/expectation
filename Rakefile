@@ -9,4 +9,4 @@ end
 # Add "rake release and rake install"
 Bundler::GemHelper.install_tasks
 
-task :default => [:test, :rdoc]
+task :default => [:test]

@@ -11,7 +11,7 @@ class ExpectationTest < Test::Unit::TestCase
   end
   
   def assert_failed_expectation!(*expectation, &block)
-    assert_raise(ArgumentError) {  
+    assert_raise(Expectation::Error) {  
       expect! *expectation, &block
     }
   end
@@ -32,10 +32,10 @@ class ExpectationTest < Test::Unit::TestCase
   # i.e. points to this file.
   def test_expectations_backtrace
     backtrace = nil
-    
+
     begin
       expect! 1 => 0
-    rescue 
+    rescue
       backtrace = $!.backtrace
     end
     assert backtrace.first.include?("/expect_test.rb:")

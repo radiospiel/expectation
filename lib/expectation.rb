@@ -3,6 +3,12 @@
 # Copyright:: Copyright (c) 2011, 2012 radiospiel
 # License::   Distributes under the terms of the Modified BSD License, see LICENSE.BSD for details.
 #++
+
+module Expectation; end
+
+require_relative "core/exception"
+require_relative "expectation/annotations"
+
 # The Expectation module implements methods to verify one or more values
 # against  set of expectations. This is a subset of
 # design-by-contract programming (see http://en.wikipedia.org/wiki/Design_by_contract)
@@ -24,17 +30,18 @@
 #   end
 
 module Expectation
-  class MismatchError < ArgumentError
+  class Error < ArgumentError
     attr :value, :expectation, :info
 
     def initialize(value, expectation, info = nil)
-      @value, @expectation, @info = value, expectation, info
+      @value, @expectation, @info = 
+        value, expectation, info
     end
     
     def to_s
-      msg = "#{value.inspect} does not match #{expectation.inspect}"
-      msg += ", #{info}" if info
-      msg
+      message = "#{value.inspect} does not match #{expectation.inspect}"
+      message += ", #{info}" if info
+      message
     end
   end
 
@@ -42,50 +49,68 @@ module Expectation
   # Verifies a number of expectations. If one or more expectations are 
   # not met it raises an ArgumentError. This method cannot be disabled.
   def expect!(*expectations, &block)
-    STDERR.puts "*** expect! #{expectations.inspect}"
-    
     expectations.each do |expectation|
       if expectation.is_a?(Hash)
-        match! expectation, :__hash
+        _match! expectation, :__hash
       else
-        match! expectation, :truish
+        _match! expectation, :truish
       end
     end
 
-    match! block, :__block if block
+    _match! block, :__block if block
+  rescue Error
+    $!.reraise_with_current_backtrace!
   end  
 
-  # Matches a value against an expectation. Returns true or false.
-  def match?(value, expectation)
-    STDERR.puts "*** match? #{value.inspect} vs #{expectation.inspect}"
-    
+  # Matches a value against an expectation. Raises an Expectation::Error
+  # if the expectation could not be matched. Returns true if there is a match.
+  def _match!(value, expectation)
     match = case expectation
       when :truish  then !!value
       when :fail    then false
-      when Array    then expectation.any? { |e| match?(value, e) }
+      when Array    then expectation.any? { |e| _match?(value, e) }
       when Proc     then expectation.arity == 0 ? expectation.call : expectation.call(value)
       when Regexp   then value.is_a?(String) && expectation =~ value
       when :__block then
         value.call
       when :__hash  then
-        STDERR.puts "*** match hash: #{value.inspect}"
+        raise ArgumentError unless value.is_a?(Hash)
         value.all? do |actual, exp|
-          match? actual, exp
+          _match! actual, exp
         end
-      else          
-        STDERR.puts "*** unspecified match? #{value.inspect} vs #{expectation.inspect}"
+      when Hash  then
+        Hash === value && begin
+          expectation.all? do |key, exp|
+            _match? value[key], exp
+          end
+        end
+      else
         expectation === value
     end
-    
-    STDERR.puts "!!! match? #{value.inspect} vs #{expectation.inspect}: #{match.inspect}"
-    !! match
-  end
-  
-  def match!(value, expectation) #:nodoc:#
-    STDERR.puts "*** match! #{expectation.inspect} vs #{value.inspect}"
 
-    return if match? value, expectation
-    raise MismatchError, value, expectation
+    return true if match
+
+    raise Error.new(value, expectation)
+  end
+
+  def _match?(value, expectation)
+    _match! value, expectation
+    true
+  rescue Error
+    false
+  end
+
+  def match?(value, expectation)
+    _match! value, expectation
+    true
+  rescue Error
+    false
+  end
+
+  def match!(value, expectation)
+    _match! value, expectation
+  rescue Error
+    $!.reraise_with_current_backtrace!
   end
 end
 

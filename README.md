@@ -29,3 +29,4 @@ with a String entry at key `:foo`, and either an Array or nil at key `:bar`.
 ## License
 
 The expectations gem is distributed under the terms of the Modified BSD License, see LICENSE.BSD for details.
+

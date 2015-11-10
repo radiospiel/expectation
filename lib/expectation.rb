@@ -79,7 +79,15 @@ module Expectation
     match = case expectation
       when :truish  then !!value
       when :fail    then false
-      when Array    then expectation.any? { |e| _match?(value, e) }
+      when Array    then 
+        if expectation.length == 1
+          # Array as "array of elements matching expectation
+          e = expectation.first
+          value.all? { |v| _match?(v, e) }
+        else
+          # Array as "object matching one of given expectations 
+          expectation.any? { |e| _match?(value, e) }
+        end
       when Proc     then expectation.arity == 0 ? expectation.call : expectation.call(value)
       when Regexp   then value.is_a?(String) && expectation =~ value
       when :__block then value.call

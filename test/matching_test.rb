@@ -22,6 +22,25 @@ class MatchingTest < Test::Unit::TestCase
     }
   end
 
+  def test_array_matches
+    assert_nothing_raised do
+      Expectation.match! [1], [Integer]
+    end
+    assert_raise(Expectation::Error) do
+      Expectation.match! [1], [String]
+    end
+
+    # match: each entry is either Integer or String
+    assert_nothing_raised do
+      Expectation.match! [1, "2"], [[Integer, String]]
+    end
+
+    # fails: the 3rd entry is neither Integer nor String
+    assert_raise(Expectation::Error) do
+      Expectation.match! [1, "2", /abc/], [[Integer, String]]
+    end
+  end
+
   def test_int_expectations
     assert_match 1, 1
     assert_match 1, Fixnum

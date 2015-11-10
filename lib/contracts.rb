@@ -150,7 +150,7 @@ class Contracts::Expects < Contracts::Base
     @parameter_names.each_with_index do |parameter_name, idx|
       next unless expectation = expectations[parameter_name]
 
-      Expectation.match! args[idx], expectation
+      Expectation::Matcher.match! args[idx], expectation
     end
   rescue Expectation::Error
     raise Contracts::Error, "#{$!} in call to `#{method_name}`", caller[5..-1]
@@ -172,7 +172,7 @@ class Contracts::Returns < Contracts::Base
   end
 
   def after_call(rv, receiver, *args, &blk)
-    Expectation.match! rv, expectation
+    Expectation::Matcher.match! rv, expectation
   rescue Expectation::Error
     raise Contracts::Error, "#{$!} in return of `#{method_name}`", caller[5..-1]
   end

@@ -5,40 +5,23 @@ require_relative 'test_helper'
 
 class MatchingTest < Test::Unit::TestCase
   def assert_match(value, expectation)
-    assert_equal true, Expectation.match?(value, expectation)
+    assert_equal true, Expectation::Matcher.match?(value, expectation)
   end
 
   def assert_mismatch(value, expectation)
-    assert_equal false, Expectation.match?(value, expectation)
+    assert_equal false, Expectation::Matcher.match?(value, expectation)
   end
 
   def test_mismatches_raise_exceptions
-    assert_nothing_raised do
-      Expectation.match! 1, 1
-    end
-
-    assert_raise(Expectation::Error) {
-      Expectation.match! 1, 2
-    }
+    assert_match 1, 1
+    assert_mismatch 1, 2
   end
 
   def test_array_matches
-    assert_nothing_raised do
-      Expectation.match! [1], [Integer]
-    end
-    assert_raise(Expectation::Error) do
-      Expectation.match! [1], [String]
-    end
-
-    # match: each entry is either Integer or String
-    assert_nothing_raised do
-      Expectation.match! [1, "2"], [[Integer, String]]
-    end
-
-    # fails: the 3rd entry is neither Integer nor String
-    assert_raise(Expectation::Error) do
-      Expectation.match! [1, "2", /abc/], [[Integer, String]]
-    end
+    assert_match    [1],              [Integer]
+    assert_mismatch [1],              [String]
+    assert_match    [1, "2"],         [[Integer, String]]
+    assert_mismatch [1, "2", /abc/],  [[Integer, String]]
   end
 
   def test_int_expectations

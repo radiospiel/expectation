@@ -37,13 +37,15 @@ module Expectation
       @value, @expectation, @info = 
         value, expectation, info
     end
-    
+
     def to_s
       message = "#{value.inspect} does not match #{expectation.inspect}"
       message += ", #{info}" if info
       message
     end
   end
+
+  extend self
 
   #
   # Verifies a number of expectations. If one or more expectations are 
@@ -60,9 +62,7 @@ module Expectation
     end
 
     match! block, :__block if block
-  rescue Error
-    $!.reraise_with_current_backtrace!
-  end  
+  end
 
   #
   # Does a value match an expectation?
@@ -111,4 +111,8 @@ module Expectation
   end
 end
 
-Object.send :include, Expectation
+def expect!(*args, &block)
+  Expectation.expect! *args, &block
+rescue Expectation::Error
+  $!.reraise_with_current_backtrace!
+end

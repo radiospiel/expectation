@@ -40,8 +40,11 @@ module Expectation
 
     def to_s
       message = "#{value.inspect} does not match #{expectation.inspect}"
-      message += ", #{info}" if info
-      message
+      case info
+      when nil    then  message
+      when Fixnum then  "#{message}, at index #{info}"
+      else              "#{message}, at key #{info.inspect}"
+      end
     end
   end
 
@@ -49,7 +52,10 @@ module Expectation
 
   #
   # Verifies a number of expectations. If one or more expectations are 
-  # not met it raises an ArgumentError (on the first failing expectation).
+  # not met it raises an Error (on the first failing expectation).
+  #
+  # In contrast to the global expect! function this method does not
+  # adjust an Error's backtrace.
   def expect!(*expectations, &block)
     expectations.each do |expectation|
       if expectation.is_a?(Hash)
@@ -73,17 +79,22 @@ module Expectation
     false
   end
 
+  #
   # Matches a value against an expectation. Raises an Expectation::Error
   # if the expectation could not be matched.
-  def match!(value, expectation, key=nil)
+  #
+  # The info parameter is used to add some position information to
+  # any Error raised.
+  def match!(value, expectation, info=nil)
     match = case expectation
       when :truish  then !!value
       when :fail    then false
       when Array    then 
         if expectation.length == 1
-          # Array as "array of elements matching expectation
+          # Array as "array of elements matching an expectation"; for example
+          # [1,2,3] => [Fixnum]
           e = expectation.first
-          value.all? { |v| _match?(v, e) }
+          value.each_with_index { |v, idx| match!(v, e, idx) }
         else
           # Array as "object matching one of given expectations 
           expectation.any? { |e| _match?(value, e) }
@@ -97,8 +108,7 @@ module Expectation
     end
 
     return if match
-
-    raise Error.new(value, expectation, key && "at key #{key.inspect}")
+    raise Error.new(value, expectation, info)
   end
 
   private

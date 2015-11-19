@@ -6,7 +6,15 @@ require_relative 'test_helper'
 require "contracts"
 
 class ContractsTest < Test::Unit::TestCase
-  class Foo
+  class Base
+    attr :checked
+
+    def check
+      @checked = true
+    end
+  end
+
+  class Foo < Base
     include Contracts
 
     +Expects(a: 1)
@@ -28,6 +36,12 @@ class ContractsTest < Test::Unit::TestCase
     def unexpected_throw_on_one(v)
       raise if v == 1
     end
+
+    +Returns(true)
+    def check
+      super
+    end
+
   end
 
   attr :foo
@@ -63,6 +77,11 @@ class ContractsTest < Test::Unit::TestCase
       foo.returns_arg(1)
     }
     assert e.backtrace.first.include?("test/contracts_test.rb:")
+  end
+
+  def test_calls_super
+    foo.check
+    assert foo.checked
   end
 
   def test_nothrow_contract

@@ -9,7 +9,7 @@ class ExpectationTest < Test::Unit::TestCase
   end
 
   #
-  # This test covers the usual use case: expectations are 
+  # This test covers the usual use case: expectations are
   # passed in a single Hash.
   def test_hash_expectation
     assert_expectation! "1" => /1/
@@ -47,6 +47,15 @@ class ExpectationTest < Test::Unit::TestCase
     assert_expectation! 1 => String | 1
     assert_failed_expectation! 1 => NilClass | String
     assert_expectation! 1 => NilClass | String | 1
+  end
+
+  module I; end
+  class X; include I; end
+  class Y; end
+
+  def test_interface_expectations
+    assert_expectation! X.new => I
+    assert_failed_expectation! Y.new => I
   end
 
   def test_exception_message

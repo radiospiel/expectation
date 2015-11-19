@@ -8,6 +8,7 @@ module Expectation; end
 
 require_relative "core/exception"
 require_relative "expectation/matcher"
+require_relative "expectation/multi_matcher"
 require_relative "expectation/assertions"
 
 # The Expectation module implements methods to verify one or more values

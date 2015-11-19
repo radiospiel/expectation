@@ -36,6 +36,19 @@ class ExpectationTest < Test::Unit::TestCase
     assert_failed_expectation! do nil end
   end
 
+  def test_array_expectations
+    assert_expectation! 1 => [Fixnum, String]
+    assert_expectation! 1 => [String, Fixnum]
+    assert_failed_expectation! 1 => [NilClass, String]
+  end
+
+  def test_multi_expectations
+    assert_expectation! 1 => Fixnum | String
+    assert_expectation! 1 => String | 1
+    assert_failed_expectation! 1 => NilClass | String
+    assert_expectation! 1 => NilClass | String | 1
+  end
+
   def test_exception_message
     e = assert_failed_expectation!({ 1 => 2 })
     assert e.message.include?("1 does not match 2")

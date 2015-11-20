@@ -8,46 +8,25 @@ Contracts.logger.level = Logger::ERROR
 
 class ContractsTest < Test::Unit::TestCase
   class Base
-    attr :checked
-
-    def check
-      @checked = true
-    end
   end
 
   class Foo < Base
     include Contracts
-
-    +Expects(a: 1)
-    def sum(a, b, c)
-      a + b + c
-    end
-
-    +Returns(2)
-    def returns_arg(r)
-      r
-    end
-
-    +Expects(v: Fixnum)
-    def throw_on_one(v)
-      raise if v == 1
-    end
-
-    +Nothrow()
-    def unexpected_throw_on_one(v)
-      raise if v == 1
-    end
-
-    +Returns(true)
-    def check
-      super
-    end
   end
 
   attr :foo
 
   def setup
     @foo = Foo.new
+  end
+
+  # -- Expects contracts ------------------------------------------------------
+
+  class Foo
+    +Expects(a: 1)
+    def sum(a, b, c)
+      a + b + c
+    end
   end
 
   def test_contracts_check_number_of_arguments
@@ -68,43 +47,6 @@ class ContractsTest < Test::Unit::TestCase
     assert e.backtrace.first.include?("test/contracts_test.rb:")
   end
 
-  def test_returns_contract
-    assert_nothing_raised() {
-      foo.returns_arg(2)
-    }
-
-    e = assert_raise(Contracts::Error) {
-      foo.returns_arg(1)
-    }
-    assert e.backtrace.first.include?("test/contracts_test.rb:")
-  end
-
-  def test_calls_super
-    foo.check
-    assert foo.checked
-  end
-
-  def test_nothrow_contract
-    assert_nothing_raised() {
-      foo.unexpected_throw_on_one(2)
-    }
-
-    e = assert_raise(Contracts::Error) {
-      foo.unexpected_throw_on_one(1)
-    }
-    assert e.backtrace.first.include?("test/contracts_test.rb:")
-  end
-
-  def test_still_throws_fine
-    assert_nothing_raised() {
-      foo.throw_on_one(2)
-    }
-
-    assert_raise(RuntimeError) {
-      foo.throw_on_one(1)
-    }
-  end
-
   class Foo
     attr :a, :b
     +Expects(b: String)
@@ -119,6 +61,87 @@ class ContractsTest < Test::Unit::TestCase
     assert_equal(foo.a, :one)
     assert_equal(foo.b, "check")
   end
+
+  # -- Returns contracts ------------------------------------------------------
+
+  class Foo
+    +Returns(2)
+    def returns_arg(r)
+      r
+    end
+  end
+
+  def test_returns_contract
+    assert_nothing_raised() {
+      foo.returns_arg(2)
+    }
+
+    e = assert_raise(Contracts::Error) {
+      foo.returns_arg(1)
+    }
+    assert e.backtrace.first.include?("test/contracts_test.rb:")
+  end
+
+  # -- test for call to super -------------------------------------------------
+
+  class Base
+    attr :checked
+
+    def check
+      @checked = true
+    end
+  end
+
+  class Foo
+    +Returns(true)
+    def check
+      super
+    end
+  end
+
+  def test_calls_super
+    foo.check
+    assert foo.checked
+  end
+
+  # -- Nothrow contracts ------------------------------------------------------
+
+  class Foo
+    +Nothrow()
+    def unexpected_throw_on_one(v)
+      raise if v == 1
+    end
+  end
+
+  def test_nothrow_contract
+    assert_nothing_raised() {
+      foo.unexpected_throw_on_one(2)
+    }
+
+    e = assert_raise(Contracts::Error) {
+      foo.unexpected_throw_on_one(1)
+    }
+    assert e.backtrace.first.include?("test/contracts_test.rb:")
+  end
+
+  class Foo
+    +Expects(v: Fixnum)
+    def throw_on_one(v)
+      raise if v == 1
+    end
+  end
+
+  def test_still_throws_fine
+    assert_nothing_raised() {
+      foo.throw_on_one(2)
+    }
+
+    assert_raise(RuntimeError) {
+      foo.throw_on_one(1)
+    }
+  end
+
+  # -- Runtime contracts ------------------------------------------------------
 
   require "timecop"
   class Foo

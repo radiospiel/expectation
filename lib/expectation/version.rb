@@ -5,5 +5,5 @@
 #             see LICENSE.BSD for details.
 module Expectation
   # The expectation gem's version.
-  VERSION="1.0.0"
+  VERSION = '1.0.0'
 end

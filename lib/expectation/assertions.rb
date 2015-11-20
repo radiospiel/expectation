@@ -5,7 +5,6 @@
 #             see LICENSE.BSD for details.
 #++
 
-
 # The Expectation::Assertions module provides expect! and inexpect!
 # assertions to use from within test cases.
 #
@@ -26,7 +25,7 @@ module Expectation::Assertions
     begin
       Expectation.expect!(*expectation, &block)
     rescue Expectation::Error
-      exc = $!
+      exc = $ERROR_INFO
     end
 
     assert_block(exc && exc.message) { !exc }
@@ -39,7 +38,7 @@ module Expectation::Assertions
     begin
       Expectation.expect!(*expectation, &block)
     rescue Expectation::Error
-      exc = $!
+      exc = $ERROR_INFO
     end
 
     assert_block("Expectation(s) should fail, but didn't") { exc }

@@ -6,16 +6,16 @@
 #++
 
 class Contracts::Returns < Contracts::Base
-  attr :expectation
+  attr_reader :expectation
 
   def initialize(expectation)
     @expectation = expectation
   end
 
-  def after_call(_, rv, receiver, *args, &blk)
+  def after_call(_, rv, _receiver, *_args, &_blk)
     Expectation::Matcher.match! rv, expectation
   rescue Expectation::Error
-    error! "#{$!} in return of `#{method_name}`"
+    error! "#{$ERROR_INFO} in return of `#{method_name}`"
   end
 end
 

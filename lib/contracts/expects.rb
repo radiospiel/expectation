@@ -10,13 +10,13 @@
 require "expectation"
 
 class Contracts::Expects < Contracts::Base
-  attr :expectations
+  attr_reader :expectations
 
   def initialize(expectations)
     @expectations = expectations
   end
 
-  def before_call(receiver, *args, &blk)
+  def before_call(_receiver, *args, &_blk)
     args.each_with_index do |value, idx|
       next unless expectation = expectations_ary[idx]
       Expectation::Matcher.match! value, expectation
@@ -24,14 +24,14 @@ class Contracts::Expects < Contracts::Base
 
     nil
   rescue Expectation::Error
-    error! "#{$!} in call to `#{method_name}`"
+    error! "#{$ERROR_INFO} in call to `#{method_name}`"
   end
 
   private
 
   def expectations_ary
     @expectations_ary ||= begin
-      method.parameters.map do |flag, parameter_name|
+      method.parameters.map do |_flag, parameter_name|
         expectations[parameter_name]
       end
     end

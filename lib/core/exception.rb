@@ -10,7 +10,6 @@ class Exception
   # see the user all the annotation internals.
   def reraise_with_current_backtrace!
     set_backtrace caller[2..-1]
-    raise self
+    fail self
   end
 end
-

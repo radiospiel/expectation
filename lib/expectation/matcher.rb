@@ -10,11 +10,12 @@
 
 module Expectation::Matcher
   class Mismatch < ArgumentError
-    attr :value, :expectation, :info
+    attr_reader :value, :expectation, :info
 
     def initialize(value, expectation, info = nil)
-      @value, @expectation, @info =
-        value, expectation, info
+      @value = value
+      @expectation = expectation
+      @info = info
     end
 
     def to_s
@@ -44,30 +45,30 @@ module Expectation::Matcher
   #
   # The info parameter is used to add some position information to
   # any Mismatch raised.
-  def match!(value, expectation, info=nil)
+  def match!(value, expectation, info = nil)
     match = case expectation
-      when :truish  then !!value
-      when :fail    then false
-      when Array    then
-        if expectation.length == 1
-          # Array as "array of elements matching an expectation"; for example
-          # [1,2,3] => [Fixnum]
-          e = expectation.first
-          value.each_with_index { |v, idx| match!(v, e, idx) }
-        else
-          # Array as "object matching one of given expectations
-          expectation.any? { |e| _match?(value, e) }
-        end
-      when Proc     then expectation.arity == 0 ? expectation.call : expectation.call(value)
-      when Regexp   then value.is_a?(String) && expectation =~ value
-      when :__block then value.call
-      when Hash     then Hash === value &&
-                         expectation.each { |key, exp| match! value[key], exp, key }
-      else               expectation === value
+            when :truish  then !!value
+            when :fail    then false
+            when Array    then
+              if expectation.length == 1
+                # Array as "array of elements matching an expectation"; for example
+                # [1,2,3] => [Fixnum]
+                e = expectation.first
+                value.each_with_index { |v, idx| match!(v, e, idx) }
+              else
+                # Array as "object matching one of given expectations
+                expectation.any? { |e| _match?(value, e) }
+              end
+            when Proc     then expectation.arity == 0 ? expectation.call : expectation.call(value)
+            when Regexp   then value.is_a?(String) && expectation =~ value
+            when :__block then value.call
+            when Hash     then Hash === value &&
+                               expectation.each { |key, exp| match! value[key], exp, key }
+            else               expectation === value
     end
 
     return if match
-    raise Mismatch.new(value, expectation, info)
+    fail Mismatch.new(value, expectation, info)
   end
 
   private

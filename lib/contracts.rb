@@ -40,7 +40,8 @@ module Contracts
   end
 
   def self.consume_current_contracts
-    r, Thread.current[:current_contracts] = Thread.current[:current_contracts], nil
+    r = Thread.current[:current_contracts]
+    Thread.current[:current_contracts] = nil
     r
   end
 
@@ -153,7 +154,7 @@ module Contracts
     #
     # Returns a description of the method; i.e. Class#name or Class.name
     def method_name
-      if method.is_a?(Method)                               # A singleton method?
+      if method.is_a?(Method) # A singleton method?
         # The method owner is the singleton class of the class. Sadly, the
         # the singleton class has no name; hence we try to construct the name
         # from its to_s description.
@@ -167,7 +168,7 @@ module Contracts
     private
 
     def error!(message)
-      raise Contracts::Error, message, caller[6..-1]
+      fail Contracts::Error, message, caller[6..-1]
     end
   end
 end

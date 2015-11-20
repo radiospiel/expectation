@@ -6,8 +6,8 @@
 #++
 
 class Contracts::Nothrows < Contracts::Base
-  def on_exception(_, rv, method, receiver, *args, &blk)
-    error! "Nothrow method `#{method_name}` raised exception: #{$!}"
+  def on_exception(_, _rv, _method, _receiver, *_args, &_blk)
+    error! "Nothrow method `#{method_name}` raised exception: #{$ERROR_INFO}"
   end
 end
 

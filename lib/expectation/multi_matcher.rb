@@ -20,6 +20,6 @@ end
 
 class Module
   def |(other)
-    return Expectation::MultiMatcher.new(self, other)
+    Expectation::MultiMatcher.new(self, other)
   end
 end

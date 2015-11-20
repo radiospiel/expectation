@@ -6,7 +6,7 @@
 #++
 
 class Contracts::Runtime < Contracts::Base
-  attr :expected_runtime, :max
+  attr_reader :expected_runtime, :max
 
   def initialize(expected_runtime, options)
     @expected_runtime = expected_runtime
@@ -15,19 +15,19 @@ class Contracts::Runtime < Contracts::Base
     expect! max.nil? || expected_runtime <= max
   end
 
-  def before_call(receiver, *args, &blk)
-    return Time.now
+  def before_call(_receiver, *_args, &_blk)
+    Time.now
   end
 
-  def after_call(starts_at, rv, receiver, *args, &blk)
+  def after_call(starts_at, _rv, _receiver, *_args, &_blk)
     runtime = Time.now - starts_at
 
     if max && runtime >= max
-      error! "#{method_name} took longer than allowed: %.02f secs > %.02f secs." % [ runtime, expected_runtime ]
+      error! "#{method_name} took longer than allowed: %.02f secs > %.02f secs." % [runtime, expected_runtime]
     end
 
     if runtime >= expected_runtime
-      Contracts.logger.warn "#{method_name} took longer than expected: %.02f secs > %.02f secs." % [ runtime, expected_runtime ]
+      Contracts.logger.warn "#{method_name} took longer than expected: %.02f secs > %.02f secs." % [runtime, expected_runtime]
     end
   end
 
@@ -40,7 +40,7 @@ module Contracts::ClassMethods
   include Contracts
 
   +Expects(expected_runtime: Numeric)
-  +Expects(options: { max: [ Numeric, nil ] })
+  +Expects(options: { max: [Numeric, nil] })
   def Runtime(expected_runtime, options = {})
     Contracts::Runtime.new expected_runtime, options
   end

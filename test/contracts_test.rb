@@ -119,10 +119,11 @@ class ContractsTest < Test::Unit::TestCase
     assert_equal(foo.b, "check")
   end
 
+  require "timecop"
   class Foo
     +Runtime(0.01, max: 0.05)
     def wait_for(time)
-      sleep time
+      Timecop.travel(Time.now + time)
     end
   end
 
@@ -131,10 +132,9 @@ class ContractsTest < Test::Unit::TestCase
     foo.wait_for 0.02
 
     e = assert_raise(Contracts::Error) {
-      foo.wait_for 0.08
+      foo.wait_for 10
     }
 
-    # This one still fails:
-    # assert e.backtrace.first.include?("test/contracts_test.rb:")
+    Timecop.return
   end
 end

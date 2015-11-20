@@ -7,4 +7,5 @@ group :development do
   gem 'test-unit'
   gem "simplecov", :require => false
   gem "simplecov-console", :require => false
+  gem "timecop", :require => false
 end

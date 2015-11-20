@@ -23,6 +23,7 @@ GEM
     simplecov-html (0.10.0)
     test-unit (3.1.5)
       power_assert
+    timecop (0.8.0)
 
 PLATFORMS
   ruby
@@ -33,6 +34,7 @@ DEPENDENCIES
   simplecov
   simplecov-console
   test-unit
+  timecop
 
 BUNDLED WITH
    1.10.6

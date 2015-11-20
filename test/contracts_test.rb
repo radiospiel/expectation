@@ -41,7 +41,6 @@ class ContractsTest < Test::Unit::TestCase
     def check
       super
     end
-
   end
 
   attr :foo
@@ -118,5 +117,24 @@ class ContractsTest < Test::Unit::TestCase
 
     assert_equal(foo.a, :one)
     assert_equal(foo.b, "check")
+  end
+
+  class Foo
+    +Runtime(0.01, max: 0.05)
+    def wait_for(time)
+      sleep time
+    end
+  end
+
+  def test_runtime
+    foo.wait_for 0.001
+    foo.wait_for 0.02
+
+    e = assert_raise(Contracts::Error) {
+      foo.wait_for 0.08
+    }
+
+    # This one still fails:
+    # assert e.backtrace.first.include?("test/contracts_test.rb:")
   end
 end

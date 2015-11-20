@@ -55,22 +55,45 @@ module Contracts
     end
 
     def invoke(receiver, *args, &blk)
+      #
+      # Some contracts might need a per-invocation scope. If that is the take
+      # their before_call method will return their specific scope, and we'll
+      # carry that over to the after_call and on_exception calls.
+      #
+      # Since this is potentially costly we do rather not create a combined
+      # scope object unless we really need it; also there is an optimized
+      # code path for after_call's in effect. (Not for on_exception though;
+      # since they should only occur in exceptional situations they can carry
+      # a bit of performance penalty just fine.)
+      #
+      # TODO: This could be improved by having a each annotation take care of
+      # each individual call; a first experiment to do that, however, failed.
+      annotation_scopes = nil
+
       @before_annotations.each do |annotation|
-        annotation.before_call(receiver, *args, &blk)
+        next unless annotation_scope = annotation.before_call(receiver, *args, &blk)
+        annotation_scopes ||= {}
+        annotation_scopes[annotation.object_id] = annotation_scope
       end
 
       # instance methods are UnboundMethod, class methods are Method.
       rv = @method.is_a?(Method) ? @method.call(*args, &blk)
                                  : @method.bind(receiver).call(*args, &blk)
 
-      @after_annotations.each do |annotation|
-        annotation.after_call(rv, receiver, *args, &blk)
+      if annotation_scopes
+        @after_annotations.each do |annotation|
+          annotation.after_call(annotation_scopes[annotation.object_id], rv, receiver, *args, &blk)
+        end
+      else
+        @after_annotations.each do |annotation|
+          annotation.after_call(nil, rv, receiver, *args, &blk)
+        end
       end
 
       return rv
     rescue StandardError => exc
       @exception_annotations.each do |annotation|
-        annotation.on_exception(exc, receiver, *args, &blk)
+        annotation.on_exception(annotation_scopes && annotation_scopes[annotation.object_id], exc, receiver, *args, &blk)
       end
       raise exc
     end
@@ -156,6 +179,8 @@ class Contracts::Expects < Contracts::Base
       next unless expectation = expectations_ary[idx]
       Expectation::Matcher.match! value, expectation
     end
+
+    nil
   rescue Expectation::Error
     error! "#{$!} in call to `#{method_name}`"
   end
@@ -185,7 +210,7 @@ class Contracts::Returns < Contracts::Base
     @expectation = expectation
   end
 
-  def after_call(rv, receiver, *args, &blk)
+  def after_call(_, rv, receiver, *args, &blk)
     Expectation::Matcher.match! rv, expectation
   rescue Expectation::Error
     error! "#{$!} in return of `#{method_name}`"
@@ -199,7 +224,7 @@ module Contracts::ClassMethods
 end
 
 class Contracts::Nothrows < Contracts::Base
-  def on_exception(rv, method, receiver, *args, &blk)
+  def on_exception(_, rv, method, receiver, *args, &blk)
     error! "Nothrow method `#{method_name}` raised exception: #{$!}"
   end
 end
@@ -207,5 +232,53 @@ end
 module Contracts::ClassMethods
   def Nothrow
     Contracts::Nothrows.new
+  end
+end
+
+require "logger"
+
+class Contracts::Runtime < Contracts::Base
+  (class << self; self; end).class_eval do
+    attr :logger, true
+  end
+  self.logger = Logger.new(STDOUT)
+
+  attr :expected_runtime, :max
+
+  def initialize(expected_runtime, options)
+    @expected_runtime = expected_runtime
+    @max = options[:max]
+
+    expect! max.nil? || expected_runtime <= max
+  end
+
+  def before_call(receiver, *args, &blk)
+    return Time.now
+  end
+
+  def after_call(starts_at, rv, receiver, *args, &blk)
+    runtime = Time.now - starts_at
+
+    if max && runtime >= max
+      error! "#{method_name} took longer than allowed: %.02f secs > %.02f secs." % [ runtime, expected_runtime ]
+    end
+
+    if runtime >= expected_runtime
+      logger.warn "#{method_name} took longer than expected: %.02f secs > %.02f secs." % [ runtime, expected_runtime ]
+    end
+  end
+
+  def logger
+    self.class.logger
+  end
+end
+
+module Contracts::ClassMethods
+  include Contracts
+
+  +Expects(expected_runtime: Numeric)
+  +Expects(options: { max: [ Numeric, nil ] })
+  def Runtime(expected_runtime, options = {})
+    Contracts::Runtime.new expected_runtime, options
   end
 end

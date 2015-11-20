@@ -1,7 +1,8 @@
 #--
 # Author::    radiospiel  (mailto:eno@radiospiel.org)
 # Copyright:: Copyright (c) 2011, 2012 radiospiel
-# License::   Distributes under the terms of the Modified BSD License, see LICENSE.BSD for details.
+# License::   Distributes under the terms of the Modified BSD License,
+#             see LICENSE.BSD for details.
 #++
 
 module Expectation; end
@@ -18,13 +19,13 @@ require_relative "expectation/assertions"
 #
 # == Example
 #
-# This function expects a String argument starting with <tt>"http:"</tt>, 
-# an Integer or Float argument, and a Hash with a String entry at key 
+# This function expects a String argument starting with <tt>"http:"</tt>,
+# an Integer or Float argument, and a Hash with a String entry at key
 # <tt>:foo</tt>, and either an Array or +nil+ at key <tt>:bar</tt>.
-# 
+#
 #   def function(a, b, options = {})
-#     expect! a => /^http:/, 
-#             b => [Integer, Float], 
+#     expect! a => /^http:/,
+#             b => [Integer, Float],
 #             options => {
 #               :foo => String,
 #               :bar => [ Array, nil ]
@@ -35,7 +36,7 @@ module Expectation
   Error = Expectation::Matcher::Mismatch
 
   #
-  # Verifies a number of expectations. If one or more expectations are 
+  # Verifies a number of expectations. If one or more expectations are
   # not met it raises an Error (on the first failing expectation).
   #
   # In contrast to the global expect! function this method does not

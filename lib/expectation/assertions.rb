@@ -1,7 +1,8 @@
 #--
 # Author::    radiospiel  (mailto:eno@radiospiel.org)
 # Copyright:: Copyright (c) 2011, 2012 radiospiel
-# License::   Distributes under the terms of the Modified BSD License, see LICENSE.BSD for details.
+# License::   Distributes under the terms of the Modified BSD License,
+#             see LICENSE.BSD for details.
 #++
 
 
@@ -9,7 +10,7 @@
 # assertions to use from within test cases.
 #
 # == Example
-# 
+#
 #   class ExpectationTest < Test::Unit::TestCase
 #     include Expectation::Assertions
 #
@@ -30,7 +31,7 @@ module Expectation::Assertions
 
     assert_block(exc && exc.message) { !exc }
   end
-  
+
   # verifies the failure of the passed in expectations
   def inexpect!(*expectation, &block)
     exc = nil

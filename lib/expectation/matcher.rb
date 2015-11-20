@@ -1,7 +1,8 @@
 #--
 # Author::    radiospiel  (mailto:eno@radiospiel.org)
 # Copyright:: Copyright (c) 2011, 2012 radiospiel
-# License::   Distributes under the terms of the Modified BSD License, see LICENSE.BSD for details.
+# License::   Distributes under the terms of the Modified BSD License,
+#             see LICENSE.BSD for details.
 #++
 
 # The Expectation::Matcher module implements the logic to match a value
@@ -12,7 +13,7 @@ module Expectation::Matcher
     attr :value, :expectation, :info
 
     def initialize(value, expectation, info = nil)
-      @value, @expectation, @info = 
+      @value, @expectation, @info =
         value, expectation, info
     end
 
@@ -47,20 +48,20 @@ module Expectation::Matcher
     match = case expectation
       when :truish  then !!value
       when :fail    then false
-      when Array    then 
+      when Array    then
         if expectation.length == 1
           # Array as "array of elements matching an expectation"; for example
           # [1,2,3] => [Fixnum]
           e = expectation.first
           value.each_with_index { |v, idx| match!(v, e, idx) }
         else
-          # Array as "object matching one of given expectations 
+          # Array as "object matching one of given expectations
           expectation.any? { |e| _match?(value, e) }
         end
       when Proc     then expectation.arity == 0 ? expectation.call : expectation.call(value)
       when Regexp   then value.is_a?(String) && expectation =~ value
       when :__block then value.call
-      when Hash     then Hash === value && 
+      when Hash     then Hash === value &&
                          expectation.each { |key, exp| match! value[key], exp, key }
       else               expectation === value
     end

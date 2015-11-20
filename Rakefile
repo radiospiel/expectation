@@ -9,4 +9,8 @@ end
 # Add "rake release and rake install"
 Bundler::GemHelper.install_tasks
 
-task :default => [:test]
+task :coverage do
+  system "COVERAGE=1 rake test"
+end
+
+task :default => [:test, :coverage]

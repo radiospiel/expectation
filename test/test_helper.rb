@@ -1,18 +1,23 @@
 require 'rubygems'
 require 'bundler/setup'
 
-require 'simplecov'
-require 'simplecov-console'
-require 'test/unit'
-
-SimpleCov.start do
-  add_filter "test/*.rb"
+if ENV["COVERAGE"]
+  require 'simplecov'
+  require 'simplecov-console'
 end
 
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
-  SimpleCov::Formatter::HTMLFormatter,
-  SimpleCov::Formatter::Console,
-]
+require 'test/unit'
+
+if ENV["COVERAGE"]
+  SimpleCov.start do
+    add_filter "test/*.rb"
+  end
+
+  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+    SimpleCov::Formatter::HTMLFormatter,
+    SimpleCov::Formatter::Console,
+  ]
+end
 
 require "expectation"
 

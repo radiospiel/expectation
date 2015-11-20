@@ -104,4 +104,19 @@ class ContractsTest < Test::Unit::TestCase
       foo.throw_on_one(1)
     }
   end
+
+  class Foo
+    attr :a, :b
+    +Expects(b: String)
+    def with_default_arg(a, b="check")
+      @a, @b = a, b
+    end
+  end
+
+  def test_default_args
+    foo.with_default_arg :one
+
+    assert_equal(foo.a, :one)
+    assert_equal(foo.b, "check")
+  end
 end

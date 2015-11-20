@@ -152,15 +152,22 @@ class Contracts::Expects < Contracts::Base
   end
 
   def before_call(receiver, *args, &blk)
-    @parameter_names ||= method.parameters.map(&:last)
-
-    @parameter_names.each_with_index do |parameter_name, idx|
-      next unless expectation = expectations[parameter_name]
-
-      Expectation::Matcher.match! args[idx], expectation
+    args.each_with_index do |value, idx|
+      next unless expectation = expectations_ary[idx]
+      Expectation::Matcher.match! value, expectation
     end
   rescue Expectation::Error
     error! "#{$!} in call to `#{method_name}`"
+  end
+
+  private
+
+  def expectations_ary
+    @expectations_ary ||= begin
+      method.parameters.map do |flag, parameter_name|
+        expectations[parameter_name]
+      end
+    end
   end
 end
 

@@ -4,6 +4,7 @@
 require_relative 'test_helper'
 
 require "contracts"
+Contracts.logger.level = Logger::ERROR
 
 class ContractsTest < Test::Unit::TestCase
   class Base

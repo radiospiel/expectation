@@ -25,8 +25,15 @@
 #     end
 #   end
 #
+require "logger"
+
 module Contracts
   class Error < ArgumentError; end
+
+  (class << self; self; end).class_eval do
+    attr :logger, true
+  end
+  self.logger = Logger.new(STDOUT)
 
   def self.current_contracts
     Thread.current[:current_contracts] ||= []
@@ -235,14 +242,7 @@ module Contracts::ClassMethods
   end
 end
 
-require "logger"
-
 class Contracts::Runtime < Contracts::Base
-  (class << self; self; end).class_eval do
-    attr :logger, true
-  end
-  self.logger = Logger.new(STDOUT)
-
   attr :expected_runtime, :max
 
   def initialize(expected_runtime, options)
@@ -264,7 +264,7 @@ class Contracts::Runtime < Contracts::Base
     end
 
     if runtime >= expected_runtime
-      logger.warn "#{method_name} took longer than expected: %.02f secs > %.02f secs." % [ runtime, expected_runtime ]
+      Contracts.logger.warn "#{method_name} took longer than expected: %.02f secs > %.02f secs." % [ runtime, expected_runtime ]
     end
   end
 

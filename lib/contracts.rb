@@ -132,6 +132,12 @@ module Contracts
         "#{method.owner}##{method.name}"
       end
     end
+
+    private
+
+    def error!(message)
+      raise Contracts::Error, message, caller[6..-1]
+    end
   end
 end
 
@@ -153,7 +159,7 @@ class Contracts::Expects < Contracts::Base
       Expectation::Matcher.match! args[idx], expectation
     end
   rescue Expectation::Error
-    raise Contracts::Error, "#{$!} in call to `#{method_name}`", caller[5..-1]
+    error! "#{$!} in call to `#{method_name}`"
   end
 end
 
@@ -174,7 +180,7 @@ class Contracts::Returns < Contracts::Base
   def after_call(rv, receiver, *args, &blk)
     Expectation::Matcher.match! rv, expectation
   rescue Expectation::Error
-    raise Contracts::Error, "#{$!} in return of `#{method_name}`", caller[5..-1]
+    error! "#{$!} in return of `#{method_name}`"
   end
 end
 
@@ -186,7 +192,7 @@ end
 
 class Contracts::Nothrows < Contracts::Base
   def on_exception(rv, method, receiver, *args, &blk)
-    raise Contracts::Error, "Nothrow method `#{method_name}` raised exception: #{$!}", caller[5..-1]
+    error! "Nothrow method `#{method_name}` raised exception: #{$!}"
   end
 end
 

@@ -59,5 +59,5 @@ end
 def expect!(*args, &block)
   Expectation.expect! *args, &block
 rescue Expectation::Error
-  $ERROR_INFO.reraise_with_current_backtrace!
+  $!.reraise_with_current_backtrace!
 end

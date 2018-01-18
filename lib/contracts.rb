@@ -11,8 +11,10 @@
 #
 # We currently support the following annotations:
 #
-# - expects!
-# - returns!
+# - +Expects
+# - +Returns
+# - +Nothrows
+# - +Runtime
 #
 # == Example
 #

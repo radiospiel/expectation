@@ -71,16 +71,21 @@ sys! "git pull"
 Version.bump_version
 version = Version.read_version
 
+GEMNAME = GEMSPEC.gsub(".gemspec", "")
+GEMFILE="pkg/#{GEMNAME}-#{version}.gem"
+
+STDERR.puts "> building gem #{GEMNAME} w/version #{version} into #{GEMFILE}"
+
 sys! "git add VERSION"
 sys! "git commit -m \"bump gem to v#{version}\""
 sys! "git tag -a v#{version} -m \"Tag #{version}\""
 
-sys! "gem build #{GEMSPEC}"
+sys! "gem build #{GEMSPEC} -o #{GEMFILE}"
 
 sys! "git push origin #{$BASE_BRANCH}"
 sys! 'git push --tags --force'
 
-sys! "bundle exec fury push #{Dir.glob('*.gem').first} --as mediapeers"
+sys! "bundle exec gem push #{GEMFILE}"
 
 sys! "mkdir -p pkg"
 sys! "mv *.gem pkg"

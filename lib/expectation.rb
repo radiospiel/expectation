@@ -58,7 +58,7 @@ module Expectation
 end
 
 def expect!(*args, &block)
-  Expectation.expect! *args, &block
+  Expectation.expect!(*args, &block)
 rescue Expectation::Error
   $!.reraise_with_current_backtrace!
 end

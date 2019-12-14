@@ -33,7 +33,7 @@ module Contracts
   class Error < ArgumentError; end
 
   (class << self; self; end).class_eval do
-    attr :logger, true
+    attr_accessor :logger
   end
   self.logger = Logger.new(STDOUT)
 
@@ -151,7 +151,7 @@ module Contracts
     #
     # contains the method once the contract is initialized, which happens
     # in the Class#{singleton_,}method_added callback.
-    attr :method, true
+    attr_accessor :method
 
     #
     # Returns a description of the method; i.e. Class#name or Class.name

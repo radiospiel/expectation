@@ -155,7 +155,7 @@ class ContractsTest < Test::Unit::TestCase
     foo.wait_for 0.001
     foo.wait_for 0.02
 
-    e = assert_raise(Contracts::Error) {
+    assert_raise(Contracts::Error) {
       foo.wait_for 10
     }
 

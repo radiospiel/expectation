@@ -59,7 +59,7 @@ module Expectation::Matcher
                 value.each_with_index { |v, idx| match!(v, e, idx) }
               else
                 # Array as "object matching one of given expectations
-                expectation.any? { |e| _match?(value, e) }
+                expectation.any? { |exp| _match?(value, exp) }
               end
             when Proc     then expectation.arity == 0 ? expectation.call : expectation.call(value)
             when Regexp   then value.is_a?(String) && expectation =~ value

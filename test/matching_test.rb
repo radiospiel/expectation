@@ -76,4 +76,12 @@ class MatchingTest < Test::Unit::TestCase
     assert_mismatch({ :key => "Foo" }, { :key => [Integer,"Bar"] })
     assert_match({ :other_key => "Foo" }, { :key => [nil, "Foo"] })
   end
+
+  def test_uri_expectations
+    assert_match    "http://foo/bar", URI
+    assert_match    "/foo/bar", URI
+    assert_mismatch " foo", URI
+    assert_mismatch nil, URI
+    assert_mismatch 1, URI
+  end
 end

@@ -26,7 +26,7 @@ class MatchingTest < Test::Unit::TestCase
 
   def test_int_expectations
     assert_match 1, 1
-    assert_match 1, Fixnum
+    assert_match 1, Integer
     assert_match 1, Integer
     assert_match 1, 0..2
     assert_match 1, 0..1

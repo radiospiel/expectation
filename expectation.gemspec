@@ -1,10 +1,8 @@
-$:.unshift File.expand_path("../lib", __FILE__)
-require "expectation/version"
-
 Gem::Specification.new do |gem|
-  gem.name     = "expectation"
-  gem.version  = Expectation::VERSION
+  gem.required_ruby_version = '~> 2.4'
 
+  gem.name     = "expectation"
+  gem.version  = File.read "VERSION"
   gem.author   = "radiospiel"
   gem.email    = "eno@radiospiel.org"
   gem.homepage = "http://github.com/radiospiel/expectation"

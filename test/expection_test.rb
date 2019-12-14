@@ -37,13 +37,13 @@ class ExpectationTest < Test::Unit::TestCase
   end
 
   def test_array_expectations
-    assert_expectation! 1 => [Fixnum, String]
-    assert_expectation! 1 => [String, Fixnum]
+    assert_expectation! 1 => [Integer, String]
+    assert_expectation! 1 => [String, Integer]
     assert_failed_expectation! 1 => [NilClass, String]
   end
 
   def test_multi_expectations
-    assert_expectation! 1 => Fixnum | String
+    assert_expectation! 1 => Integer | String
     assert_expectation! 1 => String | 1
     assert_failed_expectation! 1 => NilClass | String
     assert_expectation! 1 => NilClass | String | 1

@@ -23,8 +23,8 @@ module Expectation::Matcher
     def to_s
       message = "#{value.inspect} does not match #{expectation.inspect}"
       case info
-      when nil    then  message
-      when Fixnum then  "#{message}, at index #{info}"
+      when nil     then message
+      when Integer then "#{message}, at index #{info}"
       else              "#{message}, at key #{info.inspect}"
       end
     end
@@ -54,7 +54,7 @@ module Expectation::Matcher
             when Array    then
               if expectation.length == 1
                 # Array as "array of elements matching an expectation"; for example
-                # [1,2,3] => [Fixnum]
+                # [1,2,3] => [Integer]
                 e = expectation.first
                 value.each_with_index { |v, idx| match!(v, e, idx) }
               else

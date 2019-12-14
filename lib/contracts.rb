@@ -20,8 +20,8 @@
 #
 #   class Foo
 #
-#     +Expects(value1: Fixnum, value2: /.@./)
-#     +Returns(Fixnum)
+#     +Expects(value1: Integer, value2: /.@./)
+#     +Returns(Integer)
 #
 #     def bar(value1, value2)
 #     end

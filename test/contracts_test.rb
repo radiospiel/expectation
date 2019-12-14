@@ -125,7 +125,7 @@ class ContractsTest < Test::Unit::TestCase
   end
 
   class Foo
-    +Expects(v: Fixnum)
+    +Expects(v: Integer)
     def throw_on_one(v)
       raise if v == 1
     end

@@ -1,3 +1,2 @@
-spec.old
 coverage
-expectations-*.gem
+pkg/

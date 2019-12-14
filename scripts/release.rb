@@ -73,6 +73,7 @@ version = Version.read_version
 
 GEMNAME = GEMSPEC.gsub(".gemspec", "")
 GEMFILE="pkg/#{GEMNAME}-#{version}.gem"
+sys! "mkdir -p pkg"
 
 STDERR.puts "> building gem #{GEMNAME} w/version #{version} into #{GEMFILE}"
 

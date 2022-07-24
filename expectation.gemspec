@@ -1,5 +1,5 @@
 Gem::Specification.new do |gem|
-  gem.required_ruby_version = '~> 2.4'
+  gem.required_ruby_version = '>= 2.5'
 
   gem.name     = "expectation"
   gem.version  = File.read "VERSION"
